@@ -1095,17 +1095,17 @@
         { id: 'businesses', label: c.nav[3] }
       ];
 
-      const commonPage = (title, body) => React.createElement('section', { className: 'page-fade relative py-20 px-6 sm:px-10 lg:px-14 mx-auto section-max min-h-[calc(100vh-88px)] flex flex-col items-center justify-center' },
-        React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-6 text-center' }, title),
-        React.createElement('div', { className: 'space-y-4 text-slate-200 text-base leading-relaxed max-w-6xl mx-auto text-center' }, body)
+      const commonPage = (title, body) => React.createElement('section', { className: 'page-fade relative py-20 px-6 sm:px-10 lg:px-14 mx-auto section-max min-h-[calc(100vh-88px)] flex flex-col items-start justify-center' },
+        React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-6 text-left' }, title),
+        React.createElement('div', { className: 'space-y-4 text-slate-200 text-base leading-relaxed max-w-6xl text-left' }, body)
       );
 
       const renderPage = () => {
         switch (page) {
           case 'about':
             return React.createElement('section', { className:'page-fade section-dynamic relative py-20 px-6 sm:px-10 lg:px-14 mx-auto section-max min-h-[calc(100vh-88px)]' },
-              React.createElement('h1', { className:'text-4xl md:text-5xl font-bold text-white mb-4 motion-underline text-center' }, c.about.title),
-              React.createElement('p', { className:'text-slate-300 mb-10 max-w-3xl text-base leading-relaxed mx-auto text-center' }, c.about.subtitle),
+              React.createElement('h1', { className:'text-4xl md:text-5xl font-bold text-white mb-4 motion-underline text-left' }, c.about.title),
+              React.createElement('p', { className:'text-slate-300 mb-10 max-w-3xl text-base leading-relaxed text-left' }, c.about.subtitle),
               React.createElement('div', { className:'grid gap-4 md:grid-cols-3 mb-10' },
                 c.about.stats.map((v, i) => React.createElement('div', { key:i, className:'stat-card' },
                   React.createElement('div', { className:'stat-value' }, v),
@@ -1122,9 +1122,9 @@
           case 'solutions':
             return React.createElement('section', { className: 'page-fade relative py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
               React.createElement('div', { className: 'mb-12' },
-                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-center' }, c.solutions.title),
-                React.createElement('p', { className: 'text-slate-300 text-lg max-w-2xl mb-4 mx-auto text-center' }, c.solutions.intro),
-                React.createElement('div', { className:'flex flex-wrap gap-3 mb-8 justify-center' },
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-left' }, c.solutions.title),
+                React.createElement('p', { className: 'text-slate-300 text-lg max-w-2xl mb-4 text-left' }, c.solutions.intro),
+                React.createElement('div', { className:'flex flex-wrap gap-3 mb-8 justify-start' },
                   React.createElement('button', { onClick: ()=>setPage('nonprofits'), className: 'rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-100 hover:bg-slate-800/50 transition' }, c.nav[2]),
                   React.createElement('button', { onClick: ()=>setPage('businesses'), className: 'rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-100 hover:bg-slate-800/50 transition' }, c.nav[3])
                 )
@@ -1182,7 +1182,7 @@
           case 'nonprofits':
             return commonPage(c.nonprofit.title,
               React.createElement('div', { className: 'space-y-6' },
-                React.createElement('p', { className: 'text-slate-300 max-w-3xl mx-auto text-center' }, locale==='en' ? 'Choose the area where your NGO needs the most support. Each path covers specific modules and delivers clear, measurable outcomes.' : 'NGO\'nuzun en fazla desteğe ihtiyaç duyduğu alanı seçin. Her yol belirli modülleri kapsar ve ölçülebilir sonuçlar sunar.'),
+                React.createElement('p', { className: 'text-slate-300 max-w-3xl text-left' }, locale==='en' ? 'Choose the area where your NGO needs the most support. Each path covers specific modules and delivers clear, measurable outcomes.' : 'NGO\'nuzun en fazla desteğe ihtiyaç duyduğu alanı seçin. Her yol belirli modülleri kapsar ve ölçülebilir sonuçlar sunar.'),
                 React.createElement('div', { className:'grid gap-3 md:grid-cols-3' },
                   nonprofitScenarios.map(scenario => React.createElement('button', {
                     key: scenario.id,
@@ -1205,7 +1205,7 @@
           case 'businesses':
             return commonPage(c.business.title,
               React.createElement('div', { className: 'space-y-6' },
-                React.createElement('p', { className: 'text-slate-300 max-w-3xl mx-auto text-center' }, locale==='en' ? 'Choose the challenge your organization needs to solve first. Each path maps to a practical set of operating improvements with clear outcomes.' : 'Kuruluşunuzun önce çözmesi gereken zorluğu seçin. Her yol, net sonuçları olan pratik bir operasyonel iyileştirme setine karşılık gelir.'),
+                React.createElement('p', { className: 'text-slate-300 max-w-3xl text-left' }, locale==='en' ? 'Choose the challenge your organization needs to solve first. Each path maps to a practical set of operating improvements with clear outcomes.' : 'Kuruluşunuzun önce çözmesi gereken zorluğu seçin. Her yol, net sonuçları olan pratik bir operasyonel iyileştirme setine karşılık gelir.'),
                 React.createElement('div', { className:'grid gap-3 md:grid-cols-3' },
                   businessScenarios.map(scenario => React.createElement('button', {
                     key: scenario.id,
@@ -1228,7 +1228,7 @@
           case 'approach':
             return commonPage(c.approach.title,
               React.createElement('div', { className: 'space-y-6' },
-                React.createElement('p', { className:'text-slate-300 max-w-2xl mx-auto text-center' }, c.approach.intro),
+                React.createElement('p', { className:'text-slate-300 max-w-2xl text-left' }, c.approach.intro),
                 React.createElement('div', { className:'grid gap-4 md:grid-cols-2' },
                   c.approach.steps.map((step)=>
                     React.createElement('button', {
@@ -1266,7 +1266,7 @@
           case 'insights':
             return commonPage(c.insights.title,
               React.createElement('div', { className: 'space-y-6' },
-                React.createElement('p', { className: 'text-slate-300 mb-4 max-w-2xl mx-auto text-center' }, locale==='en' ? 'Practical thinking for NGO leaders on governance, compliance, and delivery. Each insight is drawn from the challenges we see most often — and what actually helps organizations move forward.' : 'STK liderleri için yönetişim, uyum ve teslimat üzerine pratik düşünceler. Her içgörü, en sık karşılaştığımız zorluklardan ve kuruluşların gerçekten ilerleme kaydetmesine yardımcı olan yaklaşımlardan doğmaktadır.'),
+                React.createElement('p', { className: 'text-slate-300 mb-4 max-w-2xl text-left' }, locale==='en' ? 'Practical thinking for NGO leaders on governance, compliance, and delivery. Each insight is drawn from the challenges we see most often — and what actually helps organizations move forward.' : 'STK liderleri için yönetişim, uyum ve teslimat üzerine pratik düşünceler. Her içgörü, en sık karşılaştığımız zorluklardan ve kuruluşların gerçekten ilerleme kaydetmesine yardımcı olan yaklaşımlardan doğmaktadır.'),
                 insightsItems.map((insight, idx)=>
                   React.createElement('button', {
                     key: insight.id,
@@ -1331,8 +1331,8 @@
           case 'contact':
             return React.createElement('section', { className: 'page-fade py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
               React.createElement('div', { className: 'mb-12' },
-                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-center' }, c.contact.title),
-                React.createElement('p', { className: 'text-slate-300 text-lg mb-8 max-w-3xl mx-auto text-center' }, c.contact.sub)
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-left' }, c.contact.title),
+                React.createElement('p', { className: 'text-slate-300 text-lg mb-8 max-w-3xl text-left' }, c.contact.sub)
               ),
               React.createElement('div', { className: 'grid gap-8 lg:grid-cols-3' },
                 React.createElement('div', { className: 'lg:col-span-2' },
@@ -1456,8 +1456,8 @@
           case 'packages':
             return React.createElement('section', { className: 'page-fade relative py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
               React.createElement('div', { className: 'mb-12' },
-                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-center' }, locale==='en' ? 'Solution Packages' : 'Çözüm Paketleri'),
-                React.createElement('p', { className: 'text-slate-300 text-lg max-w-3xl mb-8 mx-auto text-center' }, locale==='en' ? 'Pre-configured combinations of our 14-module system, designed to address specific NGO challenges and maturity levels. Each package combines core modules with targeted timeframes and investments, plus strategy, policy, and procedure development support.' : 'Belirli STK zorlukları ve olgunluk seviyelerini ele almak için tasarlanmış, 14 modüllü sistemimizin önceden yapılandırılmış kombinasyonları. Her paket, hedeflenen zaman çerçeveleri ve yatırımlarla çekirdek modülleri; ayrıca strateji, politika ve prosedür geliştirme desteğini birleştirir.')
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-left' }, locale==='en' ? 'Solution Packages' : 'Çözüm Paketleri'),
+                React.createElement('p', { className: 'text-slate-300 text-lg max-w-3xl mb-8 text-left' }, locale==='en' ? 'Pre-configured combinations of our 14-module system, designed to address specific NGO challenges and maturity levels. Each package combines core modules with targeted timeframes and investments, plus strategy, policy, and procedure development support.' : 'Belirli STK zorlukları ve olgunluk seviyelerini ele almak için tasarlanmış, 14 modüllü sistemimizin önceden yapılandırılmış kombinasyonları. Her paket, hedeflenen zaman çerçeveleri ve yatırımlarla çekirdek modülleri; ayrıca strateji, politika ve prosedür geliştirme desteğini birleştirir.')
               ),
               React.createElement('div', { className: 'grid gap-6 lg:grid-cols-2' },
                 c.solutions.packages.map((pkg) => {
@@ -1560,8 +1560,8 @@
           case 'addons':
             return React.createElement('section', { className: 'page-fade relative py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
               React.createElement('div', { className: 'mb-12' },
-                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-center' }, locale==='en' ? 'Add-On Services' : 'Ek Hizmetler'),
-                React.createElement('p', { className: 'text-slate-300 text-lg max-w-3xl mb-8 mx-auto text-center' }, locale==='en' ? 'Specialized services that complement any package, designed to address unique needs and maximize the impact of your system implementation.' : 'Herhangi bir paketi tamamlayan ve benzersiz ihtiyaçları ele almak ve sistem uygulamanızın etkisini maksimize etmek için tasarlanmış uzmanlaşmış hizmetler.')
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-left' }, locale==='en' ? 'Add-On Services' : 'Ek Hizmetler'),
+                React.createElement('p', { className: 'text-slate-300 text-lg max-w-3xl mb-8 text-left' }, locale==='en' ? 'Specialized services that complement any package, designed to address unique needs and maximize the impact of your system implementation.' : 'Herhangi bir paketi tamamlayan ve benzersiz ihtiyaçları ele almak ve sistem uygulamanızın etkisini maksimize etmek için tasarlanmış uzmanlaşmış hizmetler.')
               ),
               React.createElement('div', { className: 'space-y-6' },
                 c.solutions.addons.map((addon) => React.createElement('div', { key: addon.id, className: 'rounded-xl border border-amber-300/25 bg-[#041f2f]/80 p-6 hover:border-amber-300/50 transition sys-card' },
