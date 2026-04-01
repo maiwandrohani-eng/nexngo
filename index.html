@@ -1739,12 +1739,12 @@
                         )
                       ))
                     ),
-                    React.createElement('div', { className:'flex items-center justify-between p-4 rounded-lg bg-cyan-900/20 border border-cyan-400/20' },
+                    React.createElement('div', { className:'flex flex-col items-start gap-3 p-4 rounded-lg bg-cyan-900/20 border border-cyan-400/20 sm:flex-row sm:items-center sm:justify-between' },
                       React.createElement('div', null,
                         React.createElement('p', { className:'text-cyan-100 font-semibold mb-1' }, locale==='en' ? 'All 8 Packages + 5 Add-On Services' : 'Tüm 8 Paket + 5 Ek Hizmet'),
                         React.createElement('p', { className:'text-sm text-slate-300' }, locale==='en' ? 'Choose a package, then add targeted services based on your donor, audit, and growth priorities.' : 'Bir paket secin, sonra bagisci, denetim ve buyume onceliklerinize gore hedefli ek hizmetleri ekleyin.')
                       ),
-                      React.createElement('button', { onClick: ()=>onNavigate('packages'), className:'ml-auto rounded-lg bg-cyan-400 text-navy px-6 py-2 font-semibold hover:bg-cyan-300 transition whitespace-nowrap' }, locale==='en' ? 'Explore Solution Packages' : 'Cozum Paketlerini Inceleyin')
+                      React.createElement('button', { onClick: ()=>onNavigate('packages'), className:'w-full rounded-lg bg-cyan-400 text-navy px-6 py-2 font-semibold hover:bg-cyan-300 transition sm:ml-auto sm:w-auto whitespace-nowrap' }, locale==='en' ? 'Explore Solution Packages' : 'Cozum Paketlerini Inceleyin')
                     )
                   )
                 ),
