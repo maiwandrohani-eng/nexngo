@@ -120,11 +120,10 @@
     .motion-underline { position: relative; display: inline-block; }
     .motion-underline::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: linear-gradient(90deg, #23fee6, #0ff0e5); transition: width .25s ease; }
     .motion-underline:hover::after { width: 100%; }
-    .hero-slide { animation: heroSlideIn .45s ease; }
-    @keyframes heroSlideIn {
-      from { opacity: 0; transform: translateX(16px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
+      .hero-slide-smooth {
+        transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: opacity, transform;
+      }
   </style>
 </head>
 <body class="min-h-screen bg-[#041223] text-slate-100">
@@ -134,7 +133,7 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
   <script>
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     function App() {
       const initialPage = window.location.hash ? window.location.hash.replace('#','') : 'home';
@@ -151,6 +150,8 @@
       const [selectedPackage, setSelectedPackage] = useState(null);
       const [heroSlide, setHeroSlide] = useState(0);
       const [heroPaused, setHeroPaused] = useState(false);
+      const [heroSlideVisible, setHeroSlideVisible] = useState(true);
+      const heroTransitionTimer = useRef(null);
       const [contactStatus, setContactStatus] = useState(null);
 
       const socialLinks = [
@@ -791,17 +792,32 @@
           }
         ];
 
+      const queueHeroSlide = (nextIndex) => {
+        if (nextIndex === heroSlide) return;
+        if (heroTransitionTimer.current) clearTimeout(heroTransitionTimer.current);
+        setHeroSlideVisible(false);
+        heroTransitionTimer.current = setTimeout(() => {
+          setHeroSlide(nextIndex);
+          requestAnimationFrame(() => setHeroSlideVisible(true));
+        }, 190);
+      };
+
       useEffect(() => {
         setHeroSlide(0);
+        setHeroSlideVisible(true);
       }, [locale]);
+
+      useEffect(() => () => {
+        if (heroTransitionTimer.current) clearTimeout(heroTransitionTimer.current);
+      }, []);
 
       useEffect(() => {
         if (page !== 'home' || heroPaused) return;
         const timer = setInterval(() => {
-          setHeroSlide((prev) => (prev + 1) % heroSlides.length);
+          queueHeroSlide((heroSlide + 1) % heroSlides.length);
         }, 3000);
         return () => clearInterval(timer);
-      }, [page, heroPaused, heroSlides.length]);
+      }, [page, heroPaused, heroSlides.length, heroSlide]);
 
       const activeHeroSlide = heroSlides[heroSlide] || heroSlides[0];
 
@@ -1295,7 +1311,9 @@
                   onMouseEnter: ()=>setHeroPaused(true),
                   onMouseLeave: ()=>setHeroPaused(false)
                 },
-                  React.createElement('div', { key:`hero-${locale}-${heroSlide}`, className:'hero-slide md:grid md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-6' },
+                  React.createElement('div', {
+                    className:`hero-slide-smooth md:grid md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-6 ${heroSlideVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`
+                  },
                     React.createElement('div', null,
                       React.createElement('h1', { className:'text-3xl md:text-5xl font-bold text-white leading-tight mb-4 max-w-4xl' }, activeHeroSlide.title),
                       React.createElement('p', { className:'text-slate-200 text-base md:text-lg mb-6 max-w-3xl' }, activeHeroSlide.sub),
@@ -1323,7 +1341,7 @@
                     heroSlides.map((_, idx) => React.createElement('button', {
                       key: `dot-${idx}`,
                       type: 'button',
-                      onClick: ()=>setHeroSlide(idx),
+                      onClick: ()=>queueHeroSlide(idx),
                       className: `h-2.5 rounded-full transition-all ${heroSlide===idx ? 'w-7 bg-cyan-300' : 'w-2.5 bg-cyan-700/70 hover:bg-cyan-500/80'}`,
                       'aria-label': locale==='en' ? `Go to slide ${idx + 1}` : `${idx + 1}. slayta git`
                     }))
