@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXNGO | Strategy & Systems Advisory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; margin: 0; background: #06141E; color: #E7EDF5; }
+    .page-fade { transition: opacity 0.35s ease-in-out, transform 0.35s ease-in-out; opacity: 1; transform: translateY(0); }
+    .page-hidden { opacity: 0; transform: translateY(12px); pointer-events: none; height: 0; }
+    .nav-link { transition: color .25s, background .25s; }
+    .nav-link-active { color: #0f6a73; background: rgba(46,196,182,0.14); }
+    .glass { background: rgba(6, 20, 35, 0.80); backdrop-filter: blur(10px); border: 1px solid rgba(60, 164, 171, 0.25); }
+    .sysmap { background: linear-gradient(180deg, rgba(7,23,35,0.95), rgba(8,28,42,0.98)); border: 1px solid rgba(58, 176, 187, 0.34); box-shadow: 0 16px 40px rgba(2,8,18,0.65); border-radius: 1rem; }
+    .sysmap::before { content: ''; position: absolute; inset: 14px 50% 14px 50%; width: 4px; transform: translateX(-50%); background: linear-gradient(to bottom, rgba(46,196,182,0.9), rgba(46,196,182,0.15)); border-radius: 999px; filter: drop-shadow(0 0 16px rgba(46,196,182,0.65)); }
+    .node-stack { position: relative; width: min(360px, 90%); margin: 0 auto; padding: 2.6rem 0; display: flex; flex-direction: column; gap: 1.1rem; z-index: 1; }
+    .node { border-radius: 999px; padding: 0.95rem 1.4rem; text-align: center; font-weight: 700; font-size: 1.05rem; color: #E7F7FB; background: rgba(12,98,107,0.87); box-shadow: 0 0 20px rgba(46,196,182,0.35); border: 1px solid rgba(56, 180, 187, 0.7); position: relative; animation: float 2.8s ease-in-out infinite alternate; }
+    .node-primary { background: linear-gradient(120deg, rgba(32,151,159,0.92), rgba(11,97,104,0.9)); }
+    .node-secondary { background: linear-gradient(120deg, rgba(19,128,137,0.9), rgba(12,98,107,0.86)); }
+    .node::after { content: ''; position: absolute; left: calc(50% - 4px); top: 100%; width: 8px; height: 32px; background: linear-gradient(to bottom, rgba(46,196,182,0.95), rgba(46,196,182,0.2)); border-radius: 999px; box-shadow: 0 0 14px rgba(46,196,182,0.8); }
+    .node:last-child::after { display: none; }
+    .dot { position: absolute; left: 50%; width: 14px; height: 14px; border-radius: 999px; background: #2ec4b6; box-shadow: 0 0 18px rgba(46,196,182,0.96), 0 0 34px rgba(46,196,182,0.44); animation: rush 4s ease-in-out infinite; top: 34px; transform: translateX(-50%); }
+    @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+    @keyframes rush { 0% { top: 38px; opacity: 0.95; } 35% { top: 132px; opacity: 0.95; } 65% { top: 272px; opacity: 0.95; } 100% { top: 404px; opacity: 0.06; } }
+    .form-field { border: 1px solid rgba(112, 207, 218, 0.3); background: rgba(8,25,35,0.82); color: #e9f6ff; border-radius: 0.7rem; padding: 0.95rem; width: 100%; }
+    .form-field:focus { outline: 2px solid rgba(46,196,182,0.8); border-color: rgba(46,196,182,0.9); }
+    .dropdown-trigger { position: relative; }
+    .dropdown-menu { display: none; position: absolute; top: 110%; left: 0; background: rgba(4,22,35,0.96); border: 1px solid rgba(46,196,182,0.35); border-radius: 0.65rem; box-shadow: 0 18px 30px rgba(1,7,16,0.75); min-width: 220px; z-index: 60; }
+    .dropdown-trigger:hover .dropdown-menu { display: block; }
+    .dropdown-link { display: block; padding: 0.55rem 0.9rem; border-radius: 0.55rem; color: #C9E3ED; text-align: left; font-size: 0.92rem; }
+    .dropdown-link:hover { background: rgba(46,196,182,0.18); color: #ffffff; }
+    .pulse-glow { animation: pulseGlow 2.8s ease-in-out infinite; }
+    .layered { position: relative; z-index: 1; }
+    .hero-grid {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0.35;
+      background-image: linear-gradient(to right, rgba(13,45,61,0.16) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(13,45,61,0.16) 1px, transparent 1px);
+      background-size: 44px 44px;
+      transform: scale(1.1);
+      animation: drift 26s linear infinite;
+    }
+    .hero-particles {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .hero-particle {
+      position: absolute; width: 4px; height: 4px; border-radius: 50%;
+      background: rgba(44,220,214,0.9); box-shadow: 0 0 12px rgba(44,220,214,.8);
+      animation: particleRise var(--p-time, 8s) linear infinite;
+    }
+    .sys-visual { position: relative; margin-top: 2rem; min-height: 450px; }
+    .sys-node {
+      position: absolute; width: 140px; padding: 0.8rem 0.85rem;
+      border-radius: 16px; background: rgba(8,28,40,0.88);
+      border: 1px solid rgba(44,220,214,0.35);
+      box-shadow: 0 0 28px rgba(7,152,160,0.25);
+      cursor: pointer; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .sys-line { position: absolute; width: 2px; background: rgba(44,220,214,0.45); transform-origin: top; transition: background .25s ease, opacity .25s ease; }
+    .sys-node.hovered { transform: translateY(-6px) scale(1.05); box-shadow: 0 0 28px rgba(31, 242, 237, 0.6); border-color: rgba(44,220,214,0.8); }
+    .sys-detail { transition: opacity .3s ease; opacity: 0.7; }
+    .sys-detail-active { opacity: 1; }
+    .overflow-layer { position: absolute; inset: 0; pointer-events: none;}
+    @keyframes drift { 0% { transform: translateY(0) scale(1.1); } 100% { transform: translateY(-34px) scale(1.1); } }
+    @keyframes particleRise { 0% { transform: translate(0, 120%); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(0, -30%); opacity: 0; } }
+    @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 20px rgba(46,196,182,0.3); } 50% { box-shadow: 0 0 30px rgba(46,196,182,0.45); } }
+    .home-panel { background: linear-gradient(145deg, rgba(8,23,36,0.8), rgba(7,29,42,0.9)); border: 1px solid rgba(46,196,182,0.23); backdrop-filter: blur(2px); }
+    .interactive-card { transition: transform .25s ease, background .25s ease, box-shadow .25s ease; }
+    .interactive-card:hover { transform: translateY(-8px); background: rgba(20,85,100,0.9); box-shadow: 0 12px 28px rgba(17,113,122,0.35); }
+    .sys-card { position: relative; border: 1px solid rgba(46,196,182,.3); background: rgba(1,12,24,0.92); padding: 1.1rem; border-radius: 1rem; }
+    .sys-card::before { content: ''; position: absolute; inset: -16px; border-radius: 1.2rem; background: linear-gradient(150deg, rgba(46,196,182,.08), rgba(13,98,107,.12)); filter: blur(16px); opacity: 0.7; z-index: -1; }
+    .section-offset { transform: skewY(-2deg); }
+    .section-offset .section-inner { transform: skewY(2deg); }
+    .section-gradient { background: radial-gradient(circle at top left, rgba(45,220,214,0.24), rgba(7,21,34,0.9)); }
+    .expandable { min-height: 3.1rem; transition: all .2s ease; }
+    .expandable:hover .expand-target { max-height: 240px; opacity: 1; }
+    .expand-target { max-height: 0; overflow: hidden; opacity: 0; transition: max-height .3s ease, opacity .3s ease; }    
+    .section-max { max-width: 1400px; }
+    .analytics-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(15,70,95,0.32); border: 1px solid rgba(45,200,210,.25); border-radius: 999px; padding: .35rem .75rem; font-size: .9rem;
+    }
+    .stat-card { background: rgba(12,45,62,.7); border: 1px solid rgba(40,170,188,.35); border-radius: 1rem; padding: 1rem 1.1rem; box-shadow: inset 0 0 14px rgba(0,0,0,.22), 0 10px 20px rgba(0,0,0,.18); transition: transform .3s ease, box-shadow .3s ease; }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: inset 0 0 20px rgba(0,0,0,.25), 0 14px 24px rgba(0,0,0,.24); }
+    .stat-value { font-size: 2.2rem; font-weight: 700; color: #f0ffff; }
+    .stat-label { color: #b9e8ef; font-size: .95rem; }
+    .code-point { font-family: 'Inter', monospace; font-size: .83rem; color: #78e8ff; background: rgba(8,23,34,0.6); border: 1px solid rgba(42,195,201,0.3); border-radius: .65rem; padding: .2rem .5rem; }
+    .sys-visual::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle at 45% 20%, rgba(111,210,222,.16), transparent 38%), radial-gradient(circle at 78% 77%, rgba(16,234,221,.12), transparent 42%); pointer-events: none; }
+    .sys-node { min-width: 145px; min-height: 52px; }
+    .section-dynamic { background: linear-gradient(145deg, rgba(1,14,25,.96), rgba(2,18,34,.92)); border-top: 1px solid rgba(45, 190, 205, 0.14); }
+    .motion-underline { position: relative; display: inline-block; }
+    .motion-underline::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: linear-gradient(90deg, #23fee6, #0ff0e5); transition: width .25s ease; }
+    .motion-underline:hover::after { width: 100%; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#041223] text-slate-100">
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <script>
+    const { useState, useEffect } = React;
+
+    function App() {
+      const initialPage = window.location.hash ? window.location.hash.replace('#','') : 'home';
+      const validPages = ['home','about','solutions','nonprofits','businesses','approach','insights','contact','packages','addons'];
+      const [page, setPage] = useState(validPages.includes(initialPage) ? initialPage : 'home');
+      const [locale, setLocale] = useState('en');
+      const [hoverNode, setHoverNode] = useState(null);
+      const [selectedNode, setSelectedNode] = useState(null);
+      const [activeService, setActiveService] = useState(null);
+      const [selectedNonprofit, setSelectedNonprofit] = useState(null);
+      const [selectedBusiness, setSelectedBusiness] = useState(null);
+      const [activeApproach, setActiveApproach] = useState(null);
+      const [selectedSolutionModule, setSelectedSolutionModule] = useState(null);
+      const [selectedInsight, setSelectedInsight] = useState(null);
+      const [selectedPackage, setSelectedPackage] = useState(null);
+      const [contactStatus, setContactStatus] = useState(null);
+
+      const nonprofitScenarios = [
+        {
+          id: 'grant-compliance',
+          title: 'Grant Compliance & Audit Readiness',
+          titleTr: 'Hibe Uyumu ve Denetime Hazırlık',
+          highlights: ['Stay ahead of every donor obligation', 'Eliminate missed reporting deadlines', 'Be audit-ready before the reviewer arrives'],
+          highlightsTr: ['Her bağışçı yükümlülüğünde önde kalın', 'Raporlama son tarihlerini kaçırmayın', 'Denetçi gelmeden denetime hazır olun'],
+          detail: 'Most NGOs face donor scrutiny not because of poor delivery, but because compliance tracking, reporting, and contract management are scattered. This path covers Modules 3, 4, and 12 — building a structured system for obligation tracking, financial controls, and regulatory readiness. Typical outcomes: fewer missed deadlines, cleaner audit trails, and stronger donor confidence in how your organization manages its commitments.',
+          detailTr: 'STK\'ların çoğu, zayıf teslimat nedeniyle değil; uyum takibi, raporlama ve sözleşme yönetiminin dağınık olması nedeniyle bağışçı sorgulamalarıyla karşılaşır. Bu yol, Modüller 3, 4 ve 12\'yi kapsar — yükümlülük takibi, finansal kontroller ve yasal hazırlık için yapılandırılmış bir sistem kurar. Tipik sonuçlar: daha az kaçırılan son tarih, daha temiz denetim izleri ve kuruluşunuzun taahhütlerini nasıl yönettiğine dair daha güçlü bağışçı güveni.'
+        },
+        {
+          id: 'impact-measurement',
+          title: 'Impact Measurement & Program Evidence',
+          titleTr: 'Etki Ölçümü ve Program Kanıtı',
+          highlights: ['Prove the outcomes your programs actually deliver', 'Collect beneficiary data with confidence', 'Turn field evidence into donor-ready reporting'],
+          highlightsTr: ['Programlarınızın yarattığı sonuçları kanıtlayın', 'Faydalanıcı verilerini güvenle toplayın', 'Saha kanıtını bağışçıya hazır raporlamaya dönüştürün'],
+          detail: 'Donors increasingly expect credible outcome evidence, not just activity summaries. This path covers Modules 9, 10, and 11 — building stronger beneficiary tracking, outcome indicators, and impact communication systems. Typical outcomes: more credible evidence for grant renewals, better-structured donor reports, and clearer internal learning from every program cycle.',
+          detailTr: 'Bağışçılar, yalnızca faaliyet özetleri değil, güvenilir sonuç kanıtı bekler. Bu yol, Modüller 9, 10 ve 11\'i kapsar — daha güçlü faydalanıcı takibi, sonuç göstergeleri ve etki iletişimi kurar. Tipik sonuçlar: yenilemeler için daha güvenilir kanıt, daha iyi yapılandırılmış bağışçı raporları ve her program döngüsünden daha net iç öğrenme.'
+        },
+        {
+          id: 'fundraising-efficiency',
+          title: 'Funding Readiness & Grant Strategy',
+          titleTr: 'Finansman Hazırlığı ve Hibe Stratejisi',
+          highlights: ['Focus on grants your NGO is positioned to win', 'Improve proposal quality before submission', 'Build a more reliable, scalable funding pipeline'],
+          highlightsTr: ['STK\'nızın kazanmaya en uygun hibelerini hedefleyin', 'Teklif kalitesini başvurudan önce artırın', 'Daha güvenilir ve ölçeklenebilir bir finansman hattı kurun'],
+          detail: 'Fundraising is more competitive and donor requirements are more rigorous than ever. This path covers Modules 1, 2, and 3 — helping you build a smarter grant pipeline, align proposals with donor priorities, and put a governance structure in place that earns early trust. Typical outcomes: more qualified opportunities in your pipeline, stronger proposals, and faster movement from shortlisting to award.',
+          detailTr: 'Finansman rekabeti her zamankinden daha yoğun, bağışçı gereksinimleri daha titiz. Bu yol, Modüller 1, 2 ve 3\'ü kapsar — daha akıllı bir hibe hattı kurmanıza, teklifleri bağışçı öncelikleriyle hizalamanıza ve erken güven kazanan bir yönetişim yapısı oluşturmanıza yardımcı olur. Tipik sonuçlar: daha nitelikli fırsatlar, daha güçlü teklifler ve kısa listeden ödüle daha hızlı geçiş.'
+        }
+      ];
+
+      const businessScenarios = [
+        {
+          id: 'integrated-finance',
+          title: 'Financial Visibility & Planning Discipline',
+          titleTr: 'Finansal Görünürlük ve Planlama Disiplini',
+          highlights: ['Replace reactive reporting with forward-looking financial controls', 'Give leadership cleaner, faster P&L visibility', 'Build forecasts that adapt as the business changes'],
+          highlightsTr: ['Reaktif raporlamanın yerine ileriye dönük finansal kontroller koyun', 'Liderliğe daha temiz ve hızlı kâr-zarar görünürlüğü sağlayın', 'İşletme değiştikçe güncellenen tahminler kurun'],
+          detail: 'When finance data is fragmented or delayed, decisions slow down and accountability becomes blurred. This path connects financial planning, management controls, and leadership reporting into a tighter operating discipline. Typical outcomes: forecasts leadership can trust, problems identified earlier, and a financial control structure that works across the full business.',
+          detailTr: 'Finans verileri dağınık veya gecikmeli olduğunda kararlar yavaşlar ve hesap verebilirlik belirsizleşir. Bu yol, finansal planlamayı, yönetim kontrollerini ve liderlik raporlamasını daha sıkı bir işletim disiplinine bağlar. Tipik sonuçlar: liderlerin güvendiği tahminler, sorunların daha erken tespiti ve tüm işletmede çalışan finansal kontrol yapısı.'
+        },
+        {
+          id: 'risk-operations',
+          title: 'Risk, Controls & Operational Performance',
+          titleTr: 'Risk, Kontroller ve Operasyonel Performans',
+          highlights: ['Make risk visible before it becomes a problem', 'Build controls that are tracked, not just documented', 'Connect operational signals directly to leadership decisions'],
+          highlightsTr: ['Riski sorun haline gelmeden görünür kılın', 'Yalnızca belgelenmiş değil, aktif takip edilen kontroller kurun', 'Operasyonel sinyalleri doğrudan liderlik kararlarına bağlayın'],
+          detail: 'Most organizations have risk registers but no live view of where risk is actually moving. This path introduces active risk monitoring, control testing routines, and performance signals that give leadership a clearer view of operational health. Typical outcomes: fewer escalation surprises, controls embedded in daily operations, and a leadership dashboard that reflects reality.',
+          detailTr: 'Çoğu kuruluşun risk kaydı vardır, ancak riskin gerçekte nereye hareket ettiğine dair canlı bir görünüm yoktur. Bu yol, aktif risk izleme, kontrol test rutinleri ve liderliğe operasyonel sağlığın daha net görünümünü sunan performans sinyallerini içerir. Tipik sonuçlar: daha az eskalasyon sürprizi, günlük operasyonlara yerleştirilmiş kontroller ve gerçekliği yansıtan bir liderlik panosu.'
+        },
+        {
+          id: 'data-governance',
+          title: 'Reporting Quality & Decision Intelligence',
+          titleTr: 'Raporlama Kalitesi ve Karar İstihbaratı',
+          highlights: ['Reduce time spent reconciling conflicting data', 'Give leadership one reliable source of reporting truth', 'Make reports useful for decisions, not just compliance'],
+          highlightsTr: ['Çelişen verileri uzlaştırmak için harcanan zamanı azaltın', 'Liderliğe tek güvenilir raporlama kaynağı sağlayın', 'Raporları yalnızca uyum için değil, kararlar için kullanışlı hale getirin'],
+          detail: 'When different teams report different numbers and metrics have no agreed definition, leadership loses confidence in its data. This path establishes a shared KPI framework, cleaner data flows, and a reporting structure that is useful in real decisions — not just in board packs. Typical outcomes: less time on reconciliation, faster insight cycles, and leadership that trusts what the reports say.',
+          detailTr: 'Farklı ekipler farklı rakamlar raporladığında ve metriklerin üzerinde uzlaşılmış bir tanımı olmadığında liderlik verisine olan güven azalır. Bu yol, ortak bir KPI çerçevesi, daha temiz veri akışları ve gerçek kararlarda kullanılabilir bir raporlama yapısı kurar. Tipik sonuçlar: uzlaşmaya harcanan daha az zaman, daha hızlı içgörü döngüleri ve liderlerin güvendiği raporlar.'
+        }
+      ];
+
+      const solutionModuleDetails = {
+        en: {
+          1: { summary: 'Establishes the executive control layer that aligns strategy, policies, and risk ownership across the organization.', focus: ['Board and committee decision rights', 'Risk appetite and escalation thresholds', 'Governance calendar with review cadences'] },
+          2: { summary: 'Builds a repeatable funding engine that prioritizes qualified opportunities and strengthens proposal readiness.', focus: ['Funding pipeline scoring model', 'Donor fit and compliance filters', 'Submission workflow and review checkpoints'] },
+          3: { summary: 'Creates a single compliance register for donor obligations, reporting milestones, and contract changes.', focus: ['Grant and contract obligation tracking', 'Automated reporting deadline alerts', 'Audit trail for donor communications'] },
+          4: { summary: 'Connects budgets, ledgers, and controls so financial performance can be monitored with confidence.', focus: ['Multi-fund budget structures', 'Approval and exception controls', 'Audit-ready reporting packs'] },
+          5: { summary: 'Standardizes sourcing, purchasing, and inventory movements to reduce cost and compliance risk.', focus: ['Procurement policy workflows', 'Vendor and bid documentation', 'Supply continuity visibility'] },
+          6: { summary: 'Makes asset ownership, condition, and location traceable throughout the full operating lifecycle.', focus: ['Asset registers and tagging rules', 'Maintenance and replacement planning', 'Loss prevention and accountability logs'] },
+          7: { summary: 'Strengthens people operations with clear workforce controls, role design, and policy-backed HR workflows.', focus: ['Recruitment and onboarding controls', 'Payroll and people-cost transparency', 'Performance and policy compliance records'] },
+          8: { summary: 'Provides delivery discipline for programs and projects from planning through execution and closure.', focus: ['Milestone and dependency mapping', 'Budget-to-activity traceability', 'Issue escalation and decision logs'] },
+          9: { summary: 'Introduces safe, traceable beneficiary workflows that protect vulnerable groups and improve service quality.', focus: ['Beneficiary registration controls', 'Safeguarding incident handling', 'Consent and case traceability'] },
+          10: { summary: 'Turns program evidence into structured learning loops that improve performance and donor reporting.', focus: ['Outcome indicator design', 'Evidence collection and validation', 'Learning reviews and improvement actions'] },
+          11: { summary: 'Coordinates message, visibility, and partner reporting so impact communication stays consistent and credible.', focus: ['Campaign and reporting calendar', 'Donor visibility requirements', 'Impact storytelling standards'] },
+          12: { summary: 'Keeps the organization aligned with legal registrations, tax obligations, and jurisdiction-specific rules.', focus: ['Regulatory filing schedule', 'Policy and statutory obligation tracking', 'Eligibility readiness for donor audits'] },
+          13: { summary: 'Creates the security and data discipline needed for resilient operations and trusted reporting.', focus: ['Access control and data roles', 'Security baseline and incident response', 'Data governance and retention rules'] },
+          14: { summary: 'Designs resilient field and remote operating practices for distributed teams working in complex environments.', focus: ['Remote coordination routines', 'Duty-of-care and field safety controls', 'Offline-to-online reporting continuity'] }
+        },
+        tr: {
+          1: { summary: 'Strateji, politika ve risk sahipliğini kurum genelinde hizalayan yönetici kontrol katmanını kurar.', focus: ['Yönetim kurulu ve komite karar yetkileri', 'Risk iştahı ve eskalasyon eşikleri', 'Gözden geçirme ritmi olan yönetişim takvimi'] },
+          2: { summary: 'Nitelikli fırsatları önceliklendiren ve teklif hazırlığını güçlendiren tekrarlanabilir bir finansman motoru kurar.', focus: ['Finansman hattı puanlama modeli', 'Bağışçı uyumu ve uygunluk filtreleri', 'Başvuru iş akışı ve gözden geçirme kontrol noktaları'] },
+          3: { summary: 'Bağışçı yükümlülükleri, raporlama kilometre taşları ve sözleşme değişiklikleri için tek bir uyum kaydı oluşturur.', focus: ['Hibe ve sözleşme yükümlülüğü takibi', 'Otomatik raporlama son tarih uyarıları', 'Bağışçı iletişimleri için denetim izi'] },
+          4: { summary: 'Finansal performansın güvenle izlenebilmesi için bütçeleri, muhasebe kayıtlarını ve kontrolleri birleştirir.', focus: ['Çok fonlu bütçe yapıları', 'Onay ve istisna kontrolleri', 'Denetime hazır raporlama paketleri'] },
+          5: { summary: 'Maliyet ve uyum riskini azaltmak için tedarik, satın alma ve stok hareketlerini standartlaştırır.', focus: ['Tedarik politikası iş akışları', 'Tedarikçi ve teklif dokümantasyonu', 'Tedarik sürekliliği görünürlüğü'] },
+          6: { summary: 'Varlık sahipliğini, durumunu ve konumunu tüm operasyon yaşam döngüsü boyunca izlenebilir hale getirir.', focus: ['Varlık kayıtları ve etiketleme kuralları', 'Bakım ve yenileme planlaması', 'Kayıp önleme ve hesap verebilirlik kayıtları'] },
+          7: { summary: 'Net iş gücü kontrolleri, rol tasarımı ve politika destekli İK iş akışlarıyla insan operasyonlarını güçlendirir.', focus: ['İşe alım ve uyum kontrolleri', 'Bordro ve personel maliyeti şeffaflığı', 'Performans ve politika uyum kayıtları'] },
+          8: { summary: 'Program ve projeler için planlamadan uygulama ve kapanışa kadar teslimat disiplini sağlar.', focus: ['Kilometre taşı ve bağımlılık haritası', 'Bütçe-faaliyet izlenebilirliği', 'Konu eskalasyonu ve karar kayıtları'] },
+          9: { summary: 'Savunmasız grupları koruyan ve hizmet kalitesini artıran güvenli ve izlenebilir faydalanıcı iş akışları oluşturur.', focus: ['Faydalanıcı kayıt kontrolleri', 'Koruma olay yönetimi', 'Onay ve vaka izlenebilirliği'] },
+          10: { summary: 'Program kanıtlarını performansı iyileştiren ve bağışçı raporlamasını güçlendiren yapılandırılmış öğrenme döngülerine dönüştürür.', focus: ['Sonuç göstergesi tasarımı', 'Kanıt toplama ve doğrulama', 'Öğrenme gözden geçirmeleri ve iyileştirme aksiyonları'] },
+          11: { summary: 'Etki iletişiminin tutarlı ve güvenilir kalması için mesajı, görünürlüğü ve partner raporlamasını koordine eder.', focus: ['Kampanya ve raporlama takvimi', 'Bağışçı görünürlük gereksinimleri', 'Etki hikayeleştirme standartları'] },
+          12: { summary: 'Kurumu yasal kayıtlar, vergi yükümlülükleri ve ülke/bölge bazlı kurallarla uyumlu tutar.', focus: ['Düzenleyici bildirim takvimi', 'Politika ve yasal yükümlülük takibi', 'Bağışçı denetimine uygunluk hazırlığı'] },
+          13: { summary: 'Dayanıklı operasyonlar ve güvenilir raporlama için gerekli güvenlik ve veri disiplinini kurar.', focus: ['Erişim kontrolü ve veri rolleri', 'Güvenlik tabanı ve olay müdahalesi', 'Veri yönetişimi ve saklama kuralları'] },
+          14: { summary: 'Karmaşık ortamlarda çalışan dağınık ekipler için dayanıklı saha ve uzaktan çalışma pratikleri tasarlar.', focus: ['Uzaktan koordinasyon rutinleri', 'Görev bakım ve saha güvenliği kontrolleri', 'Çevrimdışı-çevrimiçi raporlama sürekliliği'] }
+        }
+      };
+
+      const packageDetails = {
+        en: {
+          1: { summary: 'A rapid compliance foundation for NGOs that need core governance, donor obligation tracking, and legal readiness before scaling.', outcomes: ['Board-level governance baseline', 'Donor compliance calendar in place', 'Core statutory controls documented'] },
+          2: { summary: 'A growth package that strengthens donor readiness by connecting strategy, grant targeting, compliance discipline, and financial visibility.', outcomes: ['Qualified funding pipeline visibility', 'Stronger proposal-to-award alignment', 'Financial narrative ready for donors'] },
+          3: { summary: 'An operational package focused on process discipline, procurement, asset stewardship, and delivery readiness across teams.', outcomes: ['Cleaner operational workflows', 'Procurement and asset controls improved', 'Projects tracked with better consistency'] },
+          4: { summary: 'A package for organizations that need credible evidence, beneficiary traceability, and stronger communication of impact.', outcomes: ['Impact framework established', 'Beneficiary and safeguarding controls improved', 'Donor-facing visibility assets strengthened'] },
+          5: { summary: 'A transformation package that stitches together the full operating backbone needed for governance, finance, delivery, and compliance at scale.', outcomes: ['Cross-functional operating model aligned', 'Shared control framework across core functions', 'Executive visibility into end-to-end performance'] },
+          6: { summary: 'Designed for regional and international growth, this package standardizes controls and delivery patterns across multiple countries.', outcomes: ['Multi-country operating standards defined', 'Shared governance and finance controls', 'Field and digital operations aligned'] },
+          7: { summary: 'Centers on stronger financial stewardship, risk governance, and security-minded controls for more complex grant environments.', outcomes: ['More disciplined budget governance', 'Risk and compliance thresholds formalized', 'Data-sensitive control posture improved'] },
+          8: { summary: 'Supports distributed teams with the people, security, and delivery workflows needed for remote and field-heavy operations.', outcomes: ['Remote collaboration structure established', 'Field reporting continuity improved', 'Digital operating controls strengthened'] }
+        },
+        tr: {
+          1: { summary: 'Ölçeklenmeden önce temel yönetişim, bağışçı yükümlülük takibi ve yasal hazırlığa ihtiyaç duyan STK’lar için hızlı bir uyum temeli sunar.', outcomes: ['Yönetim düzeyinde yönetişim temeli', 'Bağışçı uyum takvimi kurulumu', 'Temel yasal kontrollerin dokümantasyonu'] },
+          2: { summary: 'Strateji, hibe hedefleme, uyum disiplini ve finansal görünürlüğü birleştirerek bağışçı hazırlığını güçlendiren büyüme paketidir.', outcomes: ['Nitelikli finansman hattı görünürlüğü', 'Tekliften hibeye daha güçlü hizalama', 'Bağışçılar için hazır finansal anlatı'] },
+          3: { summary: 'Süreç disiplini, tedarik, varlık yönetimi ve ekipler arası teslimat hazırlığına odaklanan operasyon paketidir.', outcomes: ['Daha temiz operasyon iş akışları', 'Tedarik ve varlık kontrollerinde iyileşme', 'Projelerde daha tutarlı takip'] },
+          4: { summary: 'Güvenilir kanıt, faydalanıcı izlenebilirliği ve etkinin daha güçlü iletişimi gereken kuruluşlar için tasarlanmıştır.', outcomes: ['Etki çerçevesinin kurulması', 'Faydalanıcı ve koruma kontrollerinde iyileşme', 'Bağışçıya dönük görünürlük varlıklarının güçlenmesi'] },
+          5: { summary: 'Yönetişim, finans, teslimat ve uyumun ölçekli şekilde çalışması için gereken tam işletim omurgasını bir araya getiren dönüşüm paketidir.', outcomes: ['Çapraz fonksiyonel işletim modelinin hizalanması', 'Ana fonksiyonlarda ortak kontrol çerçevesi', 'Uçtan uca performans için yönetici görünürlüğü'] },
+          6: { summary: 'Bölgesel ve uluslararası büyüme için tasarlanan bu paket, çok ülkeli yapılarda kontrolleri ve teslimat desenlerini standartlaştırır.', outcomes: ['Çok ülkeli işletim standartlarının tanımlanması', 'Ortak yönetişim ve finans kontrolleri', 'Saha ve dijital operasyonların hizalanması'] },
+          7: { summary: 'Daha karmaşık hibe ortamlarında daha güçlü finansal yönetim, risk yönetişimi ve güvenlik odaklı kontrollere odaklanır.', outcomes: ['Daha disiplinli bütçe yönetişimi', 'Risk ve uyum eşiklerinin netleşmesi', 'Veri hassasiyetine uygun kontrol yapısının güçlenmesi'] },
+          8: { summary: 'Uzaktan ve saha ağırlıklı operasyonlar için gerekli insan, güvenlik ve teslimat iş akışlarıyla dağıtık ekipleri destekler.', outcomes: ['Uzaktan iş birliği yapısının kurulması', 'Saha raporlama sürekliliğinde iyileşme', 'Dijital operasyon kontrollerinin güçlenmesi'] }
+        }
+      };
+
+      const insightsItems = [
+        {
+          id: 'enterprise-opacity',
+          title: 'See What Is Slowing Delivery Before It Becomes a Donor Problem',
+          titleTr: 'Teslimatı Yavaşlatan Unsurları Bağışçı Sorununa Dönüşmeden Görün',
+          body: 'Map decisions, controls, and reporting signals in one view so leadership can spot delays, ownership gaps, and compliance risk earlier.',
+          bodyTr: 'Kararlar, kontroller ve raporlama sinyallerini tek görünümde toplayarak liderliğin gecikmeleri, sahiplik boşluklarını ve uyum riskini daha erken görmesini sağlayın.',
+          indicators: ['Fewer reporting surprises', 'Faster executive decisions', 'Clearer cross-team accountability'],
+          indicatorsTr: ['Daha az raporlama sürprizi', 'Daha hızlı yönetici kararları', 'Ekipler arası daha net hesap verebilirlik'],
+          detailsEn: 'When delivery, finance, and compliance data live in separate places, leadership reacts late and teams work around blind spots. This insight shows how an end-to-end signal map helps executives connect field activity, control status, and reporting deadlines in one operating view. The result is faster escalation, fewer missed donor expectations, and a clearer line from action to outcome.',
+          detailsTr: 'Teslimat, finans ve uyum verileri farklı yerlerde yaşadığında liderlik geç tepki verir ve ekipler kör noktalar etrafında çalışır. Bu içgörü, uçtan uca sinyal haritasının saha faaliyeti, kontrol durumu ve raporlama son tarihlerini tek bir işletim görünümünde nasıl birleştirdiğini gösterir. Sonuç; daha hızlı eskalasyon, daha az bağışçı sürprizi ve eylemden sonuca daha net bir çizgidir.'
+        },
+        {
+          id: 'risk-portfolio',
+          title: 'Replace Static Risk Registers with Live Decision Signals',
+          titleTr: 'Statik Risk Kayıtlarını Canlı Karar Sinyalleriyle Değiştirin',
+          body: 'Treat risk as an operating condition, not a spreadsheet, by linking exposure to grants, controls, deadlines, and delivery milestones.',
+          bodyTr: 'Riski bir tablo değil, operasyonel bir durum olarak yönetin; maruziyeti hibeler, kontroller, son tarihler ve teslimat kilometre taşlarıyla bağlayın.',
+          indicators: ['Earlier issue escalation', 'Stronger board visibility', 'Practical mitigation actions'],
+          indicatorsTr: ['Sorunlarda daha erken eskalasyon', 'Yönetim seviyesinde daha güçlü görünürlük', 'Daha uygulanabilir azaltım aksiyonları'],
+          detailsEn: 'Risk changes as programs expand, donor rules shift, and teams operate across more geographies. Static registers often capture risk too late to be useful. This perspective explains how a live risk portfolio gives leaders a working view of where exposure is rising, what needs action, and which decisions cannot wait. It is especially valuable for organizations managing complex grants, audits, or multi-country operations.',
+          detailsTr: 'Programlar büyüdükçe, bağışçı kuralları değiştikçe ve ekipler daha fazla coğrafyada çalıştıkça risk de değişir. Statik risk kayıtları çoğu zaman riski faydalı olacak kadar erken yakalayamaz. Bu yaklaşım, canlı bir risk portföyünün liderlere riskin nerede arttığını, neyin aksiyon istediğini ve hangi kararların bekleyemeyeceğini nasıl gösterdiğini açıklar. Özellikle karmaşık hibeler, denetimler veya çok ülkeli operasyonlar yöneten kurumlar için değerlidir.'
+        },
+        {
+          id: 'insights-codex',
+          title: 'Turn Reporting Data into Credible Donor and Leadership Evidence',
+          titleTr: 'Raporlama Verisini Bağışçı ve Liderlik İçin Güvenilir Kanıta Dönüştürün',
+          body: 'Build a shared KPI language so finance, programs, compliance, and leadership all work from the same evidence base.',
+          bodyTr: 'Finans, programlar, uyum ve liderliğin aynı kanıt tabanıyla çalışması için ortak bir KPI dili kurun.',
+          indicators: ['Cleaner KPI definitions', 'Audit-ready evidence trails', 'More trusted reports'],
+          indicatorsTr: ['Daha net KPI tanımları', 'Denetime hazır kanıt izleri', 'Daha güvenilir raporlar'],
+          detailsEn: 'Strong reporting is not just about collecting more data. It is about making every metric understandable, traceable, and useful in decisions. This insight outlines how a structured KPI framework reduces reporting disputes, strengthens donor confidence, and helps internal teams speak the same performance language. For organizations under pressure to prove impact and compliance at the same time, this creates a major operational advantage.',
+          detailsTr: 'Güçlü raporlama sadece daha fazla veri toplamak değildir. Her metriği anlaşılır, izlenebilir ve kararlar için kullanılabilir hale getirmektir. Bu içgörü, yapılandırılmış bir KPI çerçevesinin raporlama anlaşmazlıklarını nasıl azalttığını, bağışçı güvenini nasıl artırdığını ve iç ekiplerin aynı performans dilini konuşmasını nasıl sağladığını açıklar. Aynı anda hem etkiyi hem uyumu kanıtlama baskısı altındaki kurumlar için bu ciddi bir operasyonel avantaj yaratır.'
+        }
+      ];
+
+      const nodeData = [
+        { id:'governance', label: locale==='en'?'Governance':'Yönetişim', x:'12%', y:'24%', details: locale==='en' ? 'Governance node - mission model, compliance controls, executive oversight and policy framework links.' : 'Yönetişim düğümü - misyon modeli, uyum kontrolleri, yönetici denetimi ve politika çerçevesi bağlantıları.' },
+        { id:'finance', label: locale==='en'?'Finance':'Finans', x:'62%', y:'18%', details: locale==='en' ? 'Finance node - integrated budget controls, multi-source revenue tracking, and grants liability analytics.' : 'Finans düğümü - entegre bütçe kontrolleri, çok kaynaklı gelir izleme ve hibe yükümlülük analitiği.' },
+        { id:'operations', label: locale==='en'?'Operations':'Operasyon', x:'14%', y:'64%', details: locale==='en' ? 'Operations node - process orchestration, capacity planning, and delivery unit KPI telemetry.' : 'Operasyon düğümü - süreç orkestrasyonu, kapasite planlaması ve teslimat birimi KPI telemetri.' },
+        { id:'programs', label: locale==='en'?'Programs':'Programlar', x:'64%', y:'64%', details: locale==='en' ? 'Programs node - impact lifecycle, beneficiary data pipes, and outcomes compliance tracking.' : 'Programlar düğümü - etki yaşam döngüsü, yararlanıcı veri boruları ve sonuç uyum takibi.' },
+        { id:'reporting', label: locale==='en'?'Reporting':'Raporlama', x:'39%', y:'46%', details: locale==='en' ? 'Reporting node - real-time KPI dashboards, governance scorecards, and audit-ready statements.' : 'Raporlama düğümü - gerçek zamanlı KPI panoları, yönetişim puan kartları ve denetime hazır raporlar.' }
+      ];
+
+      const selectedNodeData = nodeData.find(node => node.id === selectedNode);
+
+      const nodeMetrics = {
+        governance: { compliance: '98%', reviewCycle: 'weekly', controls: 'active' },
+        finance: { burnRate: '4.7%/m', forecastAccuracy: '93%', audits: 'upcoming' },
+        operations: { throughput: '1.5x', incidentRate: '0.8%', cycleTime: '2.3d' },
+        programs: { beneficiaryReach: '2.1M', impactScore: '87', retention: '78%' },
+        reporting: { dashboards: 12, integrationStatus: 'green', latency: '600ms' }
+      };
+
+      const lines = [
+        ['governance','reporting'],
+        ['finance','reporting'],
+        ['operations','reporting'],
+        ['programs','reporting'],
+        ['governance','operations'],
+        ['finance','programs']
+      ];
+
+      const serviceItems = [
+        { 
+          id:'strategy', 
+          label: locale==='en'?'Strategy Operating Model':'Strateji İşletme Modeli', 
+          description: locale==='en'?'We map current state to adaptive system operations with a future-ready governance fabric.':'Mevcut durumu adaptif sistem operasyonlarına ve geleceğe hazır yönetişim yapısına çeviriyoruz.',
+          nodes: ['governance', 'operations', 'reporting'],
+          detail: locale==='en' ? 'Connects: Governance, Operations, Reporting' : 'Bağlantılar: Yönetişim, Operasyon, Raporlama'
+        },
+        { 
+          id:'data', 
+          label: locale==='en'?'Data Intelligence':'Veri Zekası', 
+          description: locale==='en'?'Real-time insights through data pipelines and system-level telemetry for executive decision loops.':'Yönetici karar döngüleri için gerçek zamanlı veri boru hattı ve sistem telemetri içgörüleri.',
+          nodes: ['reporting', 'finance', 'programs'],
+          detail: locale==='en' ? 'Connects: Reporting, Finance, Programs' : 'Bağlantılar: Raporlama, Finans, Programlar'
+        },
+        { 
+          id:'delivery', 
+          label: locale==='en'?'Delivery Operating Rhythm':'Teslimat İşletme Ritim', 
+          description: locale==='en'?'From sprint control to deployment governance, we orchestrate end-to-end system flow.':'Sprint kontrolünden dağıtım yönetişimine kadar uçtan uca sistem akışını düzenliyoruz.',
+          nodes: ['operations', 'programs', 'governance'],
+          detail: locale==='en' ? 'Connects: Operations, Programs, Governance' : 'Bağlantılar: Operasyon, Programlar, Yönetişim'
+        }
+      ];
+
+      useEffect(() => {
+        const onHash = () => {
+          const target = window.location.hash.replace('#', '');
+          if (validPages.includes(target)) setPage(target);
+        };
+        window.addEventListener('hashchange', onHash);
+        return () => window.removeEventListener('hashchange', onHash);
+      }, []);
+
+      const copy = {
+        en: {
+          nav: ['About', 'Solutions', 'Nonprofits', 'Businesses', 'Approach', 'Insights', 'Contact'],
+          cta: 'Book a Readiness Call',
+          heroTitle: 'Build Donor-Ready NGO Systems',
+          heroSub: 'NEXNGO helps nonprofits strengthen governance, compliance, finance, and delivery while co-developing practical strategies, policies, and procedures teams can use every day. Typical core setup takes 8-12 weeks.',
+          heroAction: 'Explore Solutions',
+          nonprofit: {
+            title: 'Nonprofit Systems & Compliance',
+            bullets: ['Grant lifecycle governance', 'Donation traceability and donor accountability', 'Impact measurement frameworks', 'Regulatory alignment across jurisdictions' ]
+          },
+          business: {
+            title: 'Enterprise Systems Velocity',
+            bullets: ['Integrated financial planning and controls', 'Operational resilience and KPIs', 'Risk & compliance architecture', 'Change leadership and execution discipline']
+          },
+          solutions: {
+            title: 'NGO Operating System',
+            intro: 'A practical 14-module system for nonprofits that need stronger governance, cleaner donor compliance, clearer financial control, and more reliable program delivery, supported by strategy, policy, and procedure development.',
+            modules: [
+              { num: 1, name: 'Strategy, Governance & Risk Management', purpose: 'Create the leadership structure that keeps decisions, accountability, and risk under control', ngoHelp: 'Gives your team clearer direction, ownership, and decision discipline', donorHelp: 'Shows donors that governance and oversight are active, not informal' },
+              { num: 2, name: 'Grant Intelligence & Resource Mobilization', purpose: 'Build a smarter funding pipeline and pursue opportunities that fit your mission and capacity', ngoHelp: 'Helps you focus effort on grants you are more likely to win and deliver well', donorHelp: 'Improves proposal quality by aligning early with donor priorities and requirements' },
+              { num: 3, name: 'Donor, Contract & Compliance Management', purpose: 'Keep donor obligations, reporting dates, and contract conditions visible in one system', ngoHelp: 'Reduces missed deadlines, compliance gaps, and last-minute reporting pressure', donorHelp: 'Creates a reliable structure for meeting donor commitments consistently' },
+              { num: 4, name: 'Financial Management & Accounting', purpose: 'Bring budgets, spending, and reporting into tighter financial control', ngoHelp: 'Improves confidence in where money is going and what needs correction', donorHelp: 'Supports the audit-ready financial reporting donors expect before they scale trust' },
+              { num: 5, name: 'Procurement & Logistics', purpose: 'Make purchasing and supply processes more controlled, cost-aware, and accountable', ngoHelp: 'Reduces waste, delays, and operational friction across teams', donorHelp: 'Demonstrates disciplined procurement practice and competitive integrity' },
+              { num: 6, name: 'Asset & Infrastructure Management', purpose: 'Track equipment, facilities, and assets with clear ownership and lifecycle visibility', ngoHelp: 'Protects operational investments and reduces loss or misuse', donorHelp: 'Provides the traceability donors and auditors expect for funded assets' },
+              { num: 7, name: 'Human Resources & People Operations', purpose: 'Strengthen workforce structure, policies, and role accountability as your team grows', ngoHelp: 'Improves hiring consistency, people oversight, and internal discipline', donorHelp: 'Creates clearer staffing controls and defensible people-cost reporting' },
+              { num: 8, name: 'Program, Project & Case Management', purpose: 'Run delivery with clearer milestones, ownership, and budget-to-activity control', ngoHelp: 'Helps programs land on time with fewer delivery surprises', donorHelp: 'Shows a direct line between approved funding, activity execution, and output tracking' },
+              { num: 9, name: 'Beneficiary Management & Safeguarding', purpose: 'Protect beneficiary workflows with stronger registration, case handling, and safeguarding controls', ngoHelp: 'Builds trust, service quality, and safer operating practice', donorHelp: 'Supports compliance with safeguarding expectations in sensitive programs' },
+              { num: 10, name: 'Monitoring, Evaluation & Learning', purpose: 'Turn performance data into evidence that improves programs and supports future funding', ngoHelp: 'Helps you prove what works and improve what does not', donorHelp: 'Produces more credible impact evidence for donor reviews and renewals' },
+              { num: 11, name: 'Communications & Visibility', purpose: 'Present your work with clearer messaging, stronger credibility, and better donor-facing visibility', ngoHelp: 'Improves trust, visibility, and stakeholder confidence in your work', donorHelp: 'Keeps visibility requirements and impact communication aligned with donor expectations' },
+              { num: 12, name: 'Legal, Tax & Regulatory Compliance', purpose: 'Stay operationally ready by keeping registrations, filings, and legal obligations under control', ngoHelp: 'Prevents avoidable compliance disruption and leadership distraction', donorHelp: 'Protects your eligibility and reduces concerns during donor due diligence' },
+              { num: 13, name: 'IT, Data & Security', purpose: 'Protect systems, data, and reporting flows with stronger digital controls', ngoHelp: 'Reduces operational exposure and improves confidence in critical information', donorHelp: 'Supports donor expectations around data protection, privacy, and security practice' },
+              { num: 14, name: 'Remote & Field Operations', purpose: 'Support distributed teams with safer, more resilient field and remote operating routines', ngoHelp: 'Improves continuity, coordination, and duty-of-care in complex environments', donorHelp: 'Shows donors that remote delivery is structured, supervised, and risk-aware' }
+            ],
+            packages: [
+              { id: 1, name: 'Starter Compliance', desc: 'Get the core governance and compliance foundations in place before donor scrutiny increases', modules: [1, 3, 12], price: 'Entry level', time: '2-3 months', ideal: 'Newly registered NGOs or teams preparing for their first serious donor and audit reviews' },
+              { id: 2, name: 'Donor-Ready & Funding Growth', desc: 'Strengthen donor confidence and build a more credible path to grant growth', modules: [1, 2, 3, 4], price: 'Growth focused', time: '3-4 months', ideal: 'NGOs ready to professionalize, improve proposal readiness, and unlock larger funding opportunities' },
+              { id: 3, name: 'Operations Excellence', desc: 'Create tighter delivery discipline across procurement, assets, people, and projects', modules: [5, 6, 7, 8], price: 'Operations tier', time: '4-5 months', ideal: 'Organizations with active programs that need stronger internal structure and fewer execution bottlenecks' },
+              { id: 4, name: 'Impact & Learning', desc: 'Show impact more credibly and turn evidence into stronger future decisions', modules: [9, 10, 11], price: 'Growth focused', time: '3 months', ideal: 'NGOs that need better beneficiary traceability, impact evidence, and donor-facing communication' },
+              { id: 5, name: 'Full Systems Transformation', desc: 'Build a complete operating backbone across governance, finance, compliance, and delivery', modules: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], price: 'Enterprise', time: '6-8 months', ideal: 'Large NGOs or multi-country organizations that need coordinated transformation, not isolated fixes' },
+              { id: 6, name: 'Multi-Country & Scale', desc: 'Standardize operations and controls across regions without losing local delivery effectiveness', modules: [1, 2, 3, 4, 5, 6, 7, 8, 13, 14], price: 'Enterprise', time: '5-7 months', ideal: 'Regional or international NGOs expanding across borders and needing shared operating standards' },
+              { id: 7, name: 'Finance & Risk Management', desc: 'Increase financial control, risk visibility, and donor confidence in high-stakes environments', modules: [1, 4, 3, 12, 13], price: 'Operations tier', time: '3-4 months', ideal: 'NGOs managing complex budgets, sensitive grants, or tighter oversight requirements' },
+              { id: 8, name: 'Remote Teams & Digital Operations', desc: 'Support distributed teams with safer digital workflows and stronger operational continuity', modules: [7, 13, 14, 8], price: 'Growth focused', time: '2-3 months', ideal: 'NGOs with remote or field-heavy teams that need better coordination, security, and delivery control' }
+            ],
+            addons: [
+              { id: 1, name: 'Financial Audit & Controls Review', desc: 'Independent audit of financial systems and controls', benefit: 'Builds donor trust and identifies control gaps', timing: 'Can run parallel to implementation' },
+              { id: 2, name: 'Zakat & Islamic Finance Compliance', desc: 'Specialized module for organizations accepting Zakat donations', benefit: 'Ensures Shariah compliance and opens new funding sources', timing: 'Add to any package' },
+              { id: 3, name: 'AI-Powered Grant & Proposal Writing', desc: 'Technology integration for intelligent proposal generation', benefit: 'Accelerates grant writing and improves success rates', timing: 'Recommended with Packages 1, 2 or 5' },
+              { id: 4, name: 'GDPR & Data Protection Compliance', desc: 'Specialized data governance for EU and international standards', benefit: 'Opens access to European donors and ensures legal compliance', timing: 'Add to any package' },
+              { id: 5, name: 'Staff Training & Change Management Program', desc: 'Comprehensive training and adoption support for your team', benefit: 'Ensures successful adoption and maximizes ROI of systems', timing: 'Recommended with all packages' }
+            ]
+          },
+          approach: {
+            title: 'Our Methodology',
+            intro: 'Every engagement follows four structured stages. Each stage has a clear purpose, defined deliverables, and a focus on what your organization will actually be able to use when we are done, including strategy design, policy development, and practical procedures.',
+            steps: [
+              {
+                label: 'Assess',
+                text: 'We start by understanding where your organization actually stands — not where you hope it is. We map your governance, finance, compliance, and delivery systems to find gaps, risks, and quick wins before anything is built, and we review the current policy and procedure baseline.',
+                activities: ['Governance and compliance gap review', 'Financial control maturity check', 'Donor-readiness assessment', 'Risk and priority mapping', 'Policy and procedure baseline review']
+              },
+              {
+                label: 'Design',
+                text: 'Using assessment findings, we build a practical system blueprint tailored to your organization — not a generic template. Each module is configured to your size, stage, donor requirements, and team capacity, alongside a clear strategy, policy, and SOP design.',
+                activities: ['Custom operating model design', 'Module and package selection', 'KPI and reporting framework setup', 'Governance structure and accountability mapping', 'Policy, procedure, and SOP drafting roadmap']
+              },
+              {
+                label: 'Implement',
+                text: 'We move from design to delivery in structured phases, working alongside your team to install each system and make sure it gets used — not just documented and forgotten. This includes embedding approved policies and procedures into day-to-day operations.',
+                activities: ['Phased module rollout', 'Team onboarding and training', 'Pilot delivery and adjustment', 'Change management and adoption support', 'Policy and procedure adoption support']
+              },
+              {
+                label: 'Strengthen',
+                text: 'Once systems are in place, we help your team turn them into standard practice — reviewing what is working, closing remaining gaps, and preparing the organization for next-stage growth and donor scrutiny through stronger governance strategy and procedural discipline.',
+                activities: ['Quarterly system review and audit cycle', 'Donor-readiness confirmation', 'Performance and KPI signal review', 'System gap follow-up and resolution', 'Policy and strategy refinement planning']
+              }
+            ]
+          },
+          about: {
+            title: 'About NEXNGO',
+            subtitle: 'NEXNGO is a strategy and systems advisory firm that helps NGOs and nonprofits build the operational foundations they need to grow, stay compliant, and earn long-term donor trust. We do not just give advice — we build the systems and co-develop the strategies, policies, and procedures your organization can actually run on.',
+            stats: ['14 Operating Modules', '8–12 Weeks', '4 Packages'],
+            statLabels: ['Complete NGO system coverage', 'Typical time to core system setup', 'From compliance foundation to full maturity'],
+            points: [
+              { heading: 'Why We Exist', body: 'Most NGOs lose donor confidence not because of poor intentions, but because of weak systems. We built NEXNGO to give nonprofits the same operational discipline that well-run organizations take for granted — governance clarity, financial controls, reporting credibility, and scalable delivery.' },
+              { heading: 'How We Work', body: 'We use a structured 14-module operating system built specifically for NGOs. Rather than fragmented recommendations, we help you install practical, connected systems across governance, finance, compliance, programs, and reporting, while also codifying strategy, policies, and procedures so your organization can handle growth and donor scrutiny without losing control.' },
+              { heading: 'Who We Work With', body: 'We work with NGOs preparing for their first major donor funding, organizations recovering from compliance gaps, and established nonprofits that want to operate at a higher standard. Whether you need a fast compliance foundation or a complete system overhaul, we have a clear path for you.' }
+            ]
+          },
+          contact: {
+            title: 'Get in Touch',
+            sub: 'Tell us where your organization is under pressure, and we will help you identify the right operating system, package, and strategy-policy-procedure support for your next step.'
+          },
+          home: {
+            title: 'Systems That Help Organizations Scale with Control',
+            subtitle: 'We help leadership teams turn governance, finance, operations, and reporting into a stronger platform for growth, compliance, and trust, backed by clear strategy, policy, and procedures.',
+            sections: [
+              'NEXNGO builds end-to-end operating systems that reduce friction between leadership decisions, program delivery, donor expectations, and reporting reality, while formalizing the strategies, policies, and procedures that sustain performance.',
+              'Our work helps organizations replace fragmented processes with clearer controls, better visibility, and practical structures that teams can actually use.',
+              'We support nonprofits and complex operating organizations that need stronger compliance, more credible reporting, and a more scalable way to run.'
+            ]
+          },
+          insights: {
+            title: 'Insights & Perspectives',
+            points: ['How to reduce donor risk before it appears in reporting', 'How to build live control visibility across complex programs', 'How stronger evidence systems improve funding confidence']
+          }
+        },
+        tr: {
+          nav: ['Hakkımızda', 'Çözümler', 'STK', 'İşletmeler', 'Yaklaşım', 'İçgörüler', 'İletişim'],
+          cta: 'Hazırlık Görüşmesi Planla',
+          heroTitle: 'Bağışçıya Hazır STK Sistemleri Kurun',
+          heroSub: 'NEXNGO, STK’ların yönetişim, uyum, finans ve teslimat yapısını güçlendirirken ekiplerin günlükte kullanabileceği strateji, politika ve prosedürleri birlikte geliştirir. Tipik çekirdek kurulum 8-12 hafta sürer.',
+          heroAction: 'Çözümleri İnceleyin',
+          nonprofit: {
+            title: 'STK Sistemleri & Uyum',
+            bullets: ['Hibe yaşam döngüsü yönetişimi', 'Bağışçı hesap verebilirliği', 'Etki ölçüm çerçeveleri', 'Çapraz ülke uyum protokolleri' ]
+          },
+          business: {
+            title: 'Kurumsal Sistem Hızı',
+            bullets: ['Entegre finansal planlama ve kontrol', 'Operasyonel dayanıklılık', 'Risk & uyum mimarisi', 'Değişim liderliği']
+          },
+          solutions: {
+            title: 'STK İşletme Sistemi',
+            intro: 'Yönetişimini güçlendirmek, bağışçı uyumunu temizleştirmek, finansal kontrolünü netleştirmek ve program teslimatını daha güvenilir hale getirmek isteyen STK’lar için pratik 14 modüllü bir sistem; strateji, politika ve prosedür geliştirme desteğiyle birlikte.',
+            modules: [
+              { num: 1, name: 'Strateji, Yönetişim ve Risk Yönetimi', purpose: 'Kararları, hesap verebilirliği ve riski kontrol altında tutan liderlik yapısını kurun', ngoHelp: 'Ekibinize daha net yön, sahiplik ve karar disiplini kazandırır', donorHelp: 'Bağışçılara yönetişim ve gözetimin aktif olduğunu gösterir' },
+              { num: 2, name: 'Hibe İstihbarı ve Kaynak Mobilizasyonu', purpose: 'Daha akıllı bir finansman hattı kurun ve misyonunuza uygun fırsatları hedefleyin', ngoHelp: 'Kazanmaya ve iyi teslim etmeye daha yakın hibeler üzerine odaklanmanızı sağlar', donorHelp: 'Teklif kalitesini, bağışçı öncelikleriyle erken hizalama sayesinde artırır' },
+              { num: 3, name: 'Bağışçı, Kontrat ve Uyum Yönetimi', purpose: 'Bağışçı yükümlülüklerini, raporlama tarihlerini ve sözleşme şartlarını tek sistemde görünür tutun', ngoHelp: 'Kaçırılan son tarihleri, uyum boşluklarını ve son dakika baskısını azaltır', donorHelp: 'Bağışçı taahhütlerini tutarlı şekilde yerine getirmek için güvenilir bir yapı kurar' },
+              { num: 4, name: 'Mali Yönetim ve Muhasebe', purpose: 'Bütçe, harcama ve raporlamayı daha sıkı finansal kontrol altına alın', ngoHelp: 'Paranın nereye gittiği ve neyin düzeltilmesi gerektiği konusunda güven verir', donorHelp: 'Bağışçıların daha fazla güvenmeden önce beklediği denetime hazır mali raporlamayı destekler' },
+              { num: 5, name: 'Tedarik ve Lojistik', purpose: 'Satın alma ve tedarik süreçlerini daha kontrollü, maliyet duyarlı ve hesap verebilir hale getirin', ngoHelp: 'İsrafı, gecikmeleri ve operasyonel sürtünmeyi azaltır', donorHelp: 'Disiplinli tedarik pratiğini ve rekabetçi dürüstlüğü gösterir' },
+              { num: 6, name: 'Varlık ve Altyapı Yönetimi', purpose: 'Ekipman, tesis ve varlıkları açık sahiplik ve yaşam döngüsü görünürlüğüyle takip edin', ngoHelp: 'Operasyonel yatırımları korur ve kayıp ya da kötü kullanımı azaltır', donorHelp: 'Finanse edilen varlıklar için bağışçıların ve denetçilerin beklediği izlenebilirliği sağlar' },
+              { num: 7, name: 'İnsan Kaynakları ve Personel Operasyonları', purpose: 'Ekip büyürken iş gücü yapısını, politikaları ve rol hesap verebilirliğini güçlendirin', ngoHelp: 'İşe alım tutarlılığını, insan yönetimini ve iç disiplini geliştirir', donorHelp: 'Daha net personel kontrolleri ve savunulabilir personel maliyeti raporlaması oluşturur' },
+              { num: 8, name: 'Program, Proje ve Vaka Yönetimi', purpose: 'Teslimatı daha net kilometre taşları, sahiplik ve bütçe-faaliyet kontrolüyle yönetin', ngoHelp: 'Programların daha az sürprizle ve zamanında ilerlemesine yardım eder', donorHelp: 'Onaylı finansman, faaliyet uygulaması ve çıktı takibi arasında doğrudan bir çizgi gösterir' },
+              { num: 9, name: 'Faydalanıcı Yönetimi ve Koruma', purpose: 'Daha güçlü kayıt, vaka yönetimi ve koruma kontrolleriyle faydalanıcı süreçlerini güvenceye alın', ngoHelp: 'Güveni, hizmet kalitesini ve daha güvenli çalışma pratiğini güçlendirir', donorHelp: 'Hassas programlarda beklenen koruma standartlarına uyumu destekler' },
+              { num: 10, name: 'İzleme, Değerlendirme ve Öğrenme', purpose: 'Performans verisini programları iyileştiren ve gelecekteki finansmanı destekleyen kanıta dönüştürün', ngoHelp: 'Neyin işe yaradığını göstermeyi ve gelişmesi gereken alanları görmeyi sağlar', donorHelp: 'Bağışçı gözden geçirmeleri ve yenilemeler için daha güvenilir etki kanıtı üretir' },
+              { num: 11, name: 'İletişim ve Etkinlik', purpose: 'Çalışmanızı daha net mesajlar, daha güçlü itibar ve daha iyi bağışçı görünürlüğüyle sunun', ngoHelp: 'Güveni, görünürlüğü ve paydaş güvenini artırır', donorHelp: 'Görünürlük gereksinimlerini ve etki iletişimini bağışçı beklentileriyle hizalar' },
+              { num: 12, name: 'Hukuki, Vergi ve Yasal Uyum', purpose: 'Kayıtları, bildirimleri ve yasal yükümlülükleri kontrol altında tutarak operasyonel hazırlığı koruyun', ngoHelp: 'Kaçınılabilir uyum kesintilerini ve liderlik dikkat dağınıklığını önler', donorHelp: 'Bağışçı incelemelerinde uygunluğu korur ve endişeleri azaltır' },
+              { num: 13, name: 'BT, Veri ve Güvenlik', purpose: 'Sistemleri, veriyi ve raporlama akışlarını daha güçlü dijital kontrollerle koruyun', ngoHelp: 'Operasyonel maruziyeti azaltır ve kritik bilgiye güveni artırır', donorHelp: 'Veri koruma, gizlilik ve güvenlik beklentilerini destekler' },
+              { num: 14, name: 'Uzaktan ve Saha Operasyonları', purpose: 'Dağıtık ekipleri daha güvenli ve dayanıklı saha/uzaktan çalışma rutinleriyle destekleyin', ngoHelp: 'Sürekliliği, koordinasyonu ve görev bakımını iyileştirir', donorHelp: 'Uzaktan teslimatın yapılandırılmış, denetimli ve risk farkındalıklı olduğunu gösterir' }
+            ],
+            packages: [
+              { id: 1, name: 'Başlangıç Uyum', desc: 'Bağışçı incelemesi artmadan önce temel yönetişim ve uyum yapısını kurun', modules: [1, 3, 12], price: 'Giriş seviyesi', time: '2-3 ay', ideal: 'İlk ciddi bağışçı ve denetim değerlendirmelerine hazırlanan yeni STK’lar veya küçük ekipler' },
+              { id: 2, name: 'Bağışçıya Hazır & Finansman Büyümesi', desc: 'Bağışçı güvenini güçlendirin ve daha inandırıcı bir finansman büyüme zemini kurun', modules: [1, 2, 3, 4], price: 'Büyüme odaklı', time: '3-4 ay', ideal: 'Profesyonelleşmek, teklif hazırlığını geliştirmek ve daha büyük finansman fırsatları açmak isteyen STK’lar' },
+              { id: 3, name: 'Operasyon Mükemmeliyeti', desc: 'Tedarik, varlık, insan ve proje akışlarında daha sıkı teslimat disiplini kurun', modules: [5, 6, 7, 8], price: 'Operasyon katmanı', time: '4-5 ay', ideal: 'Aktif programları olan ve daha güçlü iç yapı ile daha az uygulama darboğazı isteyen kuruluşlar' },
+              { id: 4, name: 'Etki ve Öğrenme', desc: 'Etkiyi daha güvenilir gösterin ve kanıtı daha iyi kararlara dönüştürün', modules: [9, 10, 11], price: 'Büyüme odaklı', time: '3 ay', ideal: 'Daha iyi faydalanıcı izlenebilirliği, etki kanıtı ve bağışçıya dönük iletişim isteyen STK’lar' },
+              { id: 5, name: 'Tam Sistem Dönüşümü', desc: 'Yönetişim, finans, uyum ve teslimat boyunca tam işletim omurgası kurun', modules: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], price: 'Kurumsal', time: '6-8 ay', ideal: 'Parçalı çözümler değil, koordineli dönüşüm isteyen büyük veya çok ülkeli STK’lar' },
+              { id: 6, name: 'Çok Ülkeli ve Ölçek', desc: 'Bölgeler arası operasyonları yerel etkinliği kaybetmeden standartlaştırın', modules: [1, 2, 3, 4, 5, 6, 7, 8, 13, 14], price: 'Kurumsal', time: '5-7 ay', ideal: 'Sınırlar arasında büyüyen ve ortak işletim standartlarına ihtiyaç duyan bölgesel veya uluslararası STK’lar' },
+              { id: 7, name: 'Finans ve Risk Yönetimi', desc: 'Yüksek riskli ortamlarda finansal kontrolü, risk görünürlüğünü ve bağışçı güvenini artırın', modules: [1, 4, 3, 12, 13], price: 'Operasyon katmanı', time: '3-4 ay', ideal: 'Karmaşık bütçeler, hassas hibeler veya daha sıkı gözetim gereksinimleri yöneten STK’lar' },
+              { id: 8, name: 'Uzak Ekipler ve Dijital Operasyonlar', desc: 'Dağıtık ekipleri daha güvenli dijital iş akışları ve daha güçlü operasyon sürekliliğiyle destekleyin', modules: [7, 13, 14, 8], price: 'Büyüme odaklı', time: '2-3 ay', ideal: 'Daha iyi koordinasyon, güvenlik ve teslimat kontrolü isteyen uzaktan veya saha ağırlıklı ekipler' }
+            ],
+            addons: [
+              { id: 1, name: 'Mali Denetim ve Kontrol İncelemesi', desc: 'Mali sistemlerin ve kontrolların bağımsız denetimi', benefit: 'Bağışçı güvenini artırır ve kontrol boşluklarını belirler', timing: 'Uygulama ile paralel yürütülebilir' },
+              { id: 2, name: 'Zakat ve İslami Finans Uyumu', desc: 'Zakat bağışları kabul eden kuruluşlar için özel modül', benefit: 'Şeriat uyumluluğunu sağlar ve yeni finansman kaynaklarını açar', timing: 'Herhangi bir pakete eklenebilir' },
+              { id: 3, name: 'AI Destekli Hibe ve Teklif Yazımı', desc: 'Akıllı teklif üretimi için teknoloji entegrasyonu', benefit: 'Hibe yazımını hızlandırır ve başarı oranlarını iyileştirir', timing: 'Paketler 1, 2 veya 5 ile önerilir' },
+              { id: 4, name: 'GDPR ve Veri Koruma Uyumu', desc: 'AB ve uluslararası standartlar için özel veri yönetişimi', benefit: 'Avrupa bağışçılarına erişimi açar ve yasal uyumluluğu sağlar', timing: 'Herhangi bir pakete eklenebilir' },
+              { id: 5, name: 'Personel Eğitimi ve Değişim Yönetimi', desc: 'Ekibiniz için kapsamlı eğitim ve benimseme desteği', benefit: 'Başarılı benimseyi sağlar ve sistemlerin yatırım getirisini maksimize eder', timing: 'Tüm paketler ile önerilir' }
+            ]
+          },
+          approach: {
+            title: 'Metodolojimiz',
+            intro: 'Her çalışma dört yapılandırılmış aşamayı takip eder. Her aşamanın net bir amacı, tanımlı çıktıları ve işimiz bittiğinde kuruluşunuzun gerçekten kullanabileceği sistem odağı vardır; buna strateji, politika ve prosedür tasarımı da dahildir.',
+            steps: [
+              {
+                label: 'Değerlendir',
+                text: 'Kuruluşunuzun gerçekte nerede durduğunu anlayarak başlıyoruz — nerede olmasını umduğunuzu değil. Hiçbir sistem kurulmadan önce boşlukları, riskleri ve hızlı kazanımları bulmak için yönetişim, finans, uyum ve teslimat yapılarınızı haritalıyor, mevcut politika ve prosedür altyapısını değerlendiriyoruz.',
+                activities: ['Yönetişim ve uyum boşluğu incelemesi', 'Finansal kontrol olgunluk değerlendirmesi', 'Bağışçıya hazırlık değerlendirmesi', 'Risk ve öncelik haritalama', 'Politika ve prosedür altyapısı incelemesi']
+              },
+              {
+                label: 'Tasarla',
+                text: 'Değerlendirme bulgularını kullanarak kuruluşunuza özel pratik bir sistem planı oluşturuyoruz — genel bir şablon değil. Her modül, büyüklüğünüze, aşamanıza, bağışçı gereksinimlerinize ve ekip kapasitenize göre yapılandırılır; bunun yanında strateji, politika ve SOP tasarımı yapılır.',
+                activities: ['Özel işletim modeli tasarımı', 'Modül ve paket seçimi', 'KPI ve raporlama çerçevesi kurulumu', 'Yönetişim yapısı ve hesap verebilirlik haritalama', 'Politika, prosedür ve SOP yazım yol haritası']
+              },
+              {
+                label: 'Uygula',
+                text: 'Tasarımdan teslimatı yapılandırılmış aşamalarda gerçekleştirerek ekibinizle birlikte çalışır ve her sistemi yalnızca belgelemekle kalmayıp gerçekten kullanılır hale getiririz. Onaylanan politika ve prosedürleri günlük uygulamaya da yerleştiririz.',
+                activities: ['Aşamalı modül devreye alma', 'Ekip katılımı ve eğitim', 'Pilot teslimat ve düzenleme', 'Değişim yönetimi ve benimseme desteği', 'Politika ve prosedür uygulama desteği']
+              },
+              {
+                label: 'Güçlendir',
+                text: 'Sistemler yerleştikten sonra ekibinizin bunları standart uygulamaya dönüştürmesine, neyin işe yaradığını gözden geçirmesine, kalan boşlukları kapatmasına ve kuruluşu bir sonraki büyüme ve bağışçı denetimi için hazırlamasına yardımcı oluruz. Bunu yönetişim stratejisi ve prosedürel disiplinle kalıcı hale getiririz.',
+                activities: ['Üç aylık sistem incelemesi ve denetim döngüsü', 'Bağışçıya hazırlık onayı', 'Performans ve KPI sinyal incelemesi', 'Sistem boşluğu takibi ve çözümü', 'Politika ve strateji iyileştirme planı']
+              }
+            ]
+          },
+          about: {
+            title: 'NEXNGO Hakkında',
+            subtitle: 'NEXNGO, STK\'ların ve kar amacı gütmeyen kuruluşların büyümek, uyumlu kalmak ve uzun vadeli bağışçı güveni kazanmak için ihtiyaç duydukları operasyonel temelleri kurmalarına yardımcı olan bir strateji ve sistem danışmanlık firmasıdır. Yalnızca tavsiye vermiyoruz — kuruluşunuzun gerçekten üzerinde çalışabileceği sistemleri, stratejileri, politikaları ve prosedürleri birlikte geliştiriyoruz.',
+            stats: ['14 Operasyon Modülü', '8–12 Hafta', '4 Paket'],
+            statLabels: ['Kapsamlı STK sistem yapısı', 'Temel sistem kurulumu için tipik süre', 'Uyum temelinden tam olgunluğa'],
+            points: [
+              { heading: 'Neden Varız', body: 'STK\'ların çoğu, kötü niyetleri nedeniyle değil, zayıf sistemler yüzünden bağışçı güvenini kaybeder. NEXNGO\'yı, iyi yönetilen kuruluşların doğal karşıladığı operasyonel disiplini — yönetişim netliği, finansal kontroller, raporlama güvenilirliği ve ölçeklenebilir teslimat — kar amacı gütmeyen kuruluşlara kazandırmak için kurduk.' },
+              { heading: 'Nasıl Çalışıyoruz', body: 'STK\'lar için özel olarak tasarlanmış, 14 modüllü yapılandırılmış bir işletim sistemi kullanıyoruz. Parçalı tavsiyeler yerine, yönetişim, finans, uyum, programlar ve raporlamada birbirine bağlı pratik sistemler kurmanıza; aynı zamanda strateji, politika ve prosedürleri kurumsallaştırmanıza yardımcı oluyoruz — böylece kuruluşunuz büyümeyi ve bağışçı denetimini kontrolü kaybetmeden yönetebilir.' },
+              { heading: 'Kimlerle Çalışıyoruz', body: 'İlk büyük bağışçı finansmanına hazırlanan STK\'larla, uyum boşluklarından toparlanmaya çalışan kuruluşlarla ve daha yüksek bir standartta faaliyet göstermek isteyen köklü sivil toplum kuruluşlarıyla çalışıyoruz. Hızlı bir uyum temeline mi yoksa eksiksiz bir sistem yenilenmesine mi ihtiyacınız var? Her ikisi için de net bir yolumuz var.' }
+            ]
+          },
+          contact: {
+            title: 'İletişime Geçin',
+            sub: 'Kuruluşunuzun en çok zorlandığı alanı paylaşın; size uygun işletim sistemi, paket ve strateji-politika-prosedür desteğini birlikte netleştirelim.'
+          },
+          home: {
+            title: 'Kuruluşların Kontrol ile Ölçeklenmesine Yardımcı Olan Sistemler',
+            subtitle: 'Liderlik ekiplerinin yönetişim, finans, operasyon ve raporlamayı büyüme, uyum ve güven için daha güçlü bir platforma dönüştürmesine, bunu strateji, politika ve prosedürlerle kalıcılaştırmasına yardımcı oluyoruz.',
+            sections: [
+              'NEXNGO, liderlik kararları, program teslimatı, bağışçı beklentileri ve raporlama gerçekliği arasındaki sürtünmeyi azaltan uçtan uca işletim sistemleri kurar; bunu destekleyen strateji, politika ve prosedürleri de birlikte geliştirir.',
+              'Çalışmalarımız, parçalı süreçleri ekiplerin gerçekten kullanabileceği daha net kontroller, daha iyi görünürlük ve pratik yapılarla değiştirir.',
+              'Daha güçlü uyum, daha güvenilir raporlama ve daha ölçeklenebilir bir çalışma biçimine ihtiyaç duyan STK’ları ve karmaşık operasyonları destekliyoruz.'
+            ]
+          },
+          insights: {
+            title: 'İçgörüler',
+            points: ['Bağışçı riskini raporlamaya yansımadan önce azaltma yolları', 'Karmaşık programlarda canlı kontrol görünürlüğü kurma', 'Daha güçlü kanıt sistemleriyle finansman güveni oluşturma']
+          }
+        }
+      };
+
+      const c = copy[locale];
+
+      const navItems = [
+        { id: 'home', label: locale==='en' ? 'Home' : 'Ana Sayfa' },
+        { id: 'about', label: c.nav[0] },
+        { id: 'solutions', label: c.nav[1] },
+        { id: 'packages', label: locale==='en' ? 'Packages' : 'Paketler' },
+        { id: 'approach', label: c.nav[4] },
+        { id: 'insights', label: c.nav[5] },
+        { id: 'contact', label: c.nav[6] }
+      ];
+
+      const solutionsSubItems = [
+        { id: 'nonprofits', label: c.nav[2] },
+        { id: 'businesses', label: c.nav[3] }
+      ];
+
+      const commonPage = (title, body) => React.createElement('section', { className: 'page-fade relative py-20 px-6 sm:px-10 lg:px-14 mx-auto section-max min-h-[calc(100vh-88px)] flex flex-col items-center justify-center' },
+        React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-6 text-center' }, title),
+        React.createElement('div', { className: 'space-y-4 text-slate-200 text-base leading-relaxed max-w-6xl mx-auto text-center' }, body)
+      );
+
+      const renderPage = () => {
+        switch (page) {
+          case 'about':
+            return React.createElement('section', { className:'page-fade section-dynamic relative py-20 px-6 sm:px-10 lg:px-14 mx-auto section-max min-h-[calc(100vh-88px)]' },
+              React.createElement('h1', { className:'text-4xl md:text-5xl font-bold text-white mb-4 motion-underline' }, c.about.title),
+              React.createElement('p', { className:'text-slate-300 mb-10 max-w-3xl text-base leading-relaxed' }, c.about.subtitle),
+              React.createElement('div', { className:'grid gap-4 md:grid-cols-3 mb-10' },
+                c.about.stats.map((v, i) => React.createElement('div', { key:i, className:'stat-card' },
+                  React.createElement('div', { className:'stat-value' }, v),
+                  React.createElement('div', { className:'stat-label' }, c.about.statLabels[i])
+                ))
+              ),
+              React.createElement('div', { className:'space-y-4 text-slate-200' },
+                c.about.points.map((p, idx)=>React.createElement('div', { key:idx, className:'rounded-xl p-6 border border-cyan-400/20 bg-slate-900/40 interactive-card' },
+                  React.createElement('h3', { className:'text-cyan-300 font-semibold text-lg mb-2' }, p.heading),
+                  React.createElement('p', { className:'text-slate-300 text-sm leading-relaxed' }, p.body)
+                ))
+              )
+            );
+          case 'solutions':
+            return React.createElement('section', { className: 'page-fade relative py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
+              React.createElement('div', { className: 'mb-12' },
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4' }, c.solutions.title),
+                React.createElement('p', { className: 'text-slate-300 text-lg max-w-2xl mb-4' }, c.solutions.intro),
+                React.createElement('div', { className:'flex flex-wrap gap-3 mb-8' },
+                  React.createElement('button', { onClick: ()=>setPage('nonprofits'), className: 'rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-100 hover:bg-slate-800/50 transition' }, c.nav[2]),
+                  React.createElement('button', { onClick: ()=>setPage('businesses'), className: 'rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-100 hover:bg-slate-800/50 transition' }, c.nav[3])
+                )
+              ),
+              React.createElement('div', { className: 'space-y-4' },
+                c.solutions.modules.map((module) => {
+                  const isExpanded = selectedSolutionModule === module.num;
+                  const detail = solutionModuleDetails[locale][module.num];
+
+                  return React.createElement('div', { key: module.num, className: `rounded-xl border p-6 transition sys-card ${isExpanded ? 'border-cyan-300 bg-[#0d3c54]' : 'border-cyan-300/25 bg-[#041f2f]/80 hover:border-cyan-300/50'}` },
+                    React.createElement('div', { className: 'flex items-start gap-4' },
+                      React.createElement('div', { className: 'flex-shrink-0 w-10 h-10 rounded-full bg-cyan-400/20 border border-cyan-400/50 flex items-center justify-center' },
+                        React.createElement('span', { className: 'text-cyan-300 font-bold text-sm' }, module.num)
+                      ),
+                      React.createElement('div', { className: 'flex-1 pr-4' },
+                        React.createElement('h3', { className: 'text-lg font-bold text-cyan-100 mb-2' }, module.name),
+                        React.createElement('p', { className: 'text-slate-200 text-sm' }, module.purpose)
+                      ),
+                      React.createElement('button', {
+                        type: 'button',
+                        onClick: () => setSelectedSolutionModule(isExpanded ? null : module.num),
+                        className: 'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-cyan-400/40 bg-slate-900/40 text-2xl text-cyan-300 transition hover:bg-slate-800/70'
+                      }, isExpanded ? '−' : '+')
+                    ),
+                    isExpanded && React.createElement('div', { className: 'mt-5 pt-5 border-t border-cyan-400/20 space-y-4' },
+                      React.createElement('p', { className: 'text-slate-200 leading-relaxed' }, detail.summary),
+                      React.createElement('div', { className: 'grid gap-4 md:grid-cols-2 text-sm' },
+                        React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-cyan-300/20 p-3' },
+                          React.createElement('h4', { className: 'font-semibold text-teal-300 mb-1 text-xs uppercase' }, locale==='en' ? 'How It Helps Your NGO' : 'STK\'ye Nasıl Yardımcı Olur'),
+                          React.createElement('p', { className: 'text-slate-300' }, module.ngoHelp)
+                        ),
+                        React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-amber-300/20 p-3' },
+                          React.createElement('h4', { className: 'font-semibold text-amber-300 mb-1 text-xs uppercase' }, locale==='en' ? 'Donor Compliance' : 'Bağışçı Uyumu'),
+                          React.createElement('p', { className: 'text-slate-300' }, module.donorHelp)
+                        )
+                      ),
+                      React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-cyan-300/20 p-4' },
+                        React.createElement('h4', { className: 'font-semibold text-cyan-200 mb-3 text-xs uppercase' }, locale==='en' ? 'Implementation Focus' : 'Uygulama Odağı'),
+                        React.createElement('ul', { className: 'space-y-2 text-slate-300 text-sm' },
+                          detail.focus.map((item, index) => React.createElement('li', { key: index }, '• ' + item))
+                        )
+                      )
+                    )
+                  );
+                })
+              ),
+              React.createElement('div', { className: 'mt-12 rounded-xl border border-cyan-300/30 bg-[#062033]/80 p-6' },
+                React.createElement('h3', { className: 'text-xl font-bold text-cyan-100 mb-3' }, locale==='en' ? 'Ready to Plan Your Next Step?' : 'Sonraki Adımı Planlamaya Hazır Mısınız?'),
+                React.createElement('p', { className: 'text-slate-300 mb-4' }, locale==='en' ? 'Book a readiness call and we will map the right package, timeline, and implementation priorities for your organization.' : 'Bir hazırlık görüşmesi planlayın; kuruluşunuz için doğru paketi, zaman çizelgesini ve uygulama önceliklerini birlikte netleştirelim.'),
+                React.createElement('button', { onClick: ()=>onNavigate('contact'), className: 'inline-flex items-center gap-2 rounded-lg bg-cyan-400 text-navy px-6 py-2 font-semibold hover:bg-cyan-300 transition' },
+                  locale==='en' ? 'Book a Readiness Call' : 'Hazırlık Görüşmesi Planla'
+                )
+              )
+            );
+          case 'nonprofits':
+            return commonPage(c.nonprofit.title,
+              React.createElement('div', { className: 'space-y-6' },
+                React.createElement('p', { className: 'text-slate-300' }, locale==='en' ? 'Choose the area where your NGO needs the most support. Each path covers specific modules and delivers clear, measurable outcomes.' : 'NGO\'nuzun en fazla desteğe ihtiyaç duyduğu alanı seçin. Her yol belirli modülleri kapsar ve ölçülebilir sonuçlar sunar.'),
+                React.createElement('div', { className:'grid gap-3 md:grid-cols-3' },
+                  nonprofitScenarios.map(scenario => React.createElement('button', {
+                    key: scenario.id,
+                    onClick: ()=>{ setSelectedNonprofit(scenario.id); setSelectedBusiness(null); },
+                    className: `interactive-card stat-card text-left ${selectedNonprofit===scenario.id ? 'border-cyan-300 bg-[#0d2c3b]' : 'bg-[#071c2b]'}`
+                  },
+                    React.createElement('h3', { className:'font-semibold text-cyan-100' }, locale==='en' ? scenario.title : scenario.titleTr),
+                    React.createElement('ul', { className:'text-slate-200 mt-2 list-disc list-inside text-sm' },
+                      (locale==='en' ? scenario.highlights : scenario.highlightsTr).map((line)=>React.createElement('li',{key:line}, line))
+                    )
+                  ))
+                ),
+                selectedNonprofit ? React.createElement('div', { className: 'sys-card' },
+                  React.createElement('h4', { className:'text-lg font-bold text-cyan-100' }, locale==='en' ? nonprofitScenarios.find(s=>s.id===selectedNonprofit).title : nonprofitScenarios.find(s=>s.id===selectedNonprofit).titleTr),
+                  React.createElement('p', { className:'text-slate-200 mt-3 leading-relaxed' }, locale==='en' ? nonprofitScenarios.find(s=>s.id===selectedNonprofit).detail : nonprofitScenarios.find(s=>s.id===selectedNonprofit).detailTr),
+                  React.createElement('p', { className:'text-cyan-300 mt-5 text-sm font-medium' }, locale==='en' ? 'Ready to put this in place? Request a readiness call and we will map the right package for your NGO.' : 'Bunu hayata geçirmeye hazır mısınız? Bir hazırlık görüşmesi talep edin; STK\'nız için doğru paketi birlikte netleştirelim.')
+                ) : React.createElement('p', { className:'text-slate-400 text-sm' }, locale==='en' ? 'Select a path above to see which modules apply and what outcomes to expect.' : 'Hangi modüllerin geçerli olduğunu ve ne gibi sonuçlar bekleneceğini görmek için yukarıdan bir yol seçin.')
+              )
+            );
+          case 'businesses':
+            return commonPage(c.business.title,
+              React.createElement('div', { className: 'space-y-6' },
+                React.createElement('p', { className: 'text-slate-300' }, locale==='en' ? 'Choose the challenge your organization needs to solve first. Each path maps to a practical set of operating improvements with clear outcomes.' : 'Kuruluşunuzun önce çözmesi gereken zorluğu seçin. Her yol, net sonuçları olan pratik bir operasyonel iyileştirme setine karşılık gelir.'),
+                React.createElement('div', { className:'grid gap-3 md:grid-cols-3' },
+                  businessScenarios.map(scenario => React.createElement('button', {
+                    key: scenario.id,
+                    onClick: ()=>{ setSelectedBusiness(scenario.id); setSelectedNonprofit(null); },
+                    className: `interactive-card stat-card text-left ${selectedBusiness===scenario.id ? 'border-cyan-300 bg-[#0d2c3b]' : 'bg-[#071c2b]'}`
+                  },
+                    React.createElement('h3', { className:'font-semibold text-cyan-100' }, locale==='en' ? scenario.title : scenario.titleTr),
+                    React.createElement('ul', { className:'text-slate-200 mt-2 list-disc list-inside text-sm' },
+                      (locale==='en' ? scenario.highlights : scenario.highlightsTr).map((line)=>React.createElement('li',{key:line}, line))
+                    )
+                  ))
+                ),
+                selectedBusiness ? React.createElement('div', { className: 'sys-card' },
+                  React.createElement('h4', { className:'text-lg font-bold text-cyan-100' }, locale==='en' ? businessScenarios.find(s=>s.id===selectedBusiness).title : businessScenarios.find(s=>s.id===selectedBusiness).titleTr),
+                  React.createElement('p', { className:'text-slate-200 mt-3 leading-relaxed' }, locale==='en' ? businessScenarios.find(s=>s.id===selectedBusiness).detail : businessScenarios.find(s=>s.id===selectedBusiness).detailTr),
+                  React.createElement('p', { className:'text-cyan-300 mt-5 text-sm font-medium' }, locale==='en' ? 'Want to see how this applies to your organization? Request a readiness call with our team.' : 'Bunun kuruluşunuza nasıl uygulanacağını görmek ister misiniz? Ekibimizle bir hazırlık görüşmesi talep edin.')
+                ) : React.createElement('p', { className:'text-slate-400 text-sm' }, locale==='en' ? 'Select a path above to see what changes and what outcomes to expect.' : 'Nelerin değişeceğini ve hangi sonuçları bekleyeceğinizi görmek için yukarıdan bir yol seçin.')
+              )
+            );
+          case 'approach':
+            return commonPage(c.approach.title,
+              React.createElement('div', { className: 'space-y-6' },
+                React.createElement('p', { className:'text-slate-300 max-w-2xl' }, c.approach.intro),
+                React.createElement('div', { className:'grid gap-4 md:grid-cols-2' },
+                  c.approach.steps.map((step)=>
+                    React.createElement('button', {
+                      key: step.label,
+                      onClick: ()=>setActiveApproach(activeApproach===step.label ? null : step.label),
+                      className: `interactive-card rounded-xl border px-5 py-4 text-left transition ${activeApproach===step.label ? 'border-cyan-300 bg-[#0f3d54]' : 'border-cyan-400/20 bg-[#082132]/80 hover:bg-[#0d3c50]'}`
+                    },
+                      React.createElement('div', { className:'flex justify-between items-center' },
+                        React.createElement('h3', { className: 'text-lg font-semibold text-cyan-100' }, step.label),
+                        React.createElement('span', { className:'text-cyan-400 text-xl font-light' }, activeApproach===step.label ? '−' : '+')
+                      ),
+                      React.createElement('p', { className: 'text-slate-300 mt-2 text-sm' }, step.text)
+                    )
+                  )
+                ),
+                activeApproach && (()=>{
+                  const step = c.approach.steps.find(s=>s.label===activeApproach);
+                  return step ? React.createElement('div', { className:'rounded-xl border border-cyan-400/30 bg-[#021b2f]/90 p-6' },
+                    React.createElement('h4', { className:'text-cyan-100 font-bold text-lg mb-1' }, step.label),
+                    React.createElement('p', { className:'text-slate-300 text-sm mb-4' }, step.text),
+                    React.createElement('p', { className:'text-xs font-semibold text-teal-400 uppercase tracking-wide mb-2' }, locale==='en' ? 'What happens in this stage' : 'Bu aşamada neler olur'),
+                    React.createElement('ul', { className:'space-y-2' },
+                      step.activities.map((activity, i)=>
+                        React.createElement('li', { key:i, className:'flex items-start gap-2 text-sm text-slate-200' },
+                          React.createElement('span', { className:'mt-1 w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0' }),
+                          activity
+                        )
+                      )
+                    ),
+                    React.createElement('button', { className:'mt-5 rounded-lg border border-cyan-300/40 px-4 py-1.5 text-xs text-cyan-200 hover:bg-cyan-900/30 transition', onClick: ()=>setActiveApproach(null) }, locale==='en' ? 'Close' : 'Kapat')
+                  ) : null;
+                })()
+              )
+            );
+          case 'insights':
+            return commonPage(c.insights.title,
+              React.createElement('div', { className: 'space-y-6' },
+                React.createElement('p', { className: 'text-slate-300 mb-4 max-w-2xl' }, locale==='en' ? 'Practical thinking for NGO leaders on governance, compliance, and delivery. Each insight is drawn from the challenges we see most often — and what actually helps organizations move forward.' : 'STK liderleri için yönetişim, uyum ve teslimat üzerine pratik düşünceler. Her içgörü, en sık karşılaştığımız zorluklardan ve kuruluşların gerçekten ilerleme kaydetmesine yardımcı olan yaklaşımlardan doğmaktadır.'),
+                insightsItems.map((insight, idx)=>
+                  React.createElement('button', {
+                    key: insight.id,
+                    onClick: ()=>setSelectedInsight(selectedInsight===insight.id ? null : insight.id),
+                    className: `sys-card interactive-card text-left ${selectedInsight===insight.id ? 'border-cyan-300 bg-[#0d3c54]' : 'border-cyan-300/30 bg-[#062033]/80 hover:bg-[#0a3a4a]'} transition`
+                  },
+                    React.createElement('div', { className: 'flex justify-between items-start gap-4' },
+                      React.createElement('div', { className: 'flex-1' },
+                        React.createElement('h3', { className: 'font-bold text-lg text-cyan-100' }, locale==='en' ? insight.title : insight.titleTr),
+                        React.createElement('p', { className: 'text-slate-300 mt-2' }, locale==='en' ? insight.body : insight.bodyTr),
+                        React.createElement('div', { className: 'mt-4 flex flex-wrap gap-2' },
+                          (locale==='en' ? insight.indicators : insight.indicatorsTr).map((indicator, i)=>React.createElement('span', { key:i, className:'inline-flex items-center gap-1 rounded-full bg-cyan-900/30 border border-cyan-500/30 px-3 py-1 text-xs text-cyan-300' },
+                            React.createElement('span', { className:'w-1.5 h-1.5 rounded-full bg-cyan-400' }),
+                            indicator
+                          ))
+                        )
+                      ),
+                      React.createElement('span', { className: 'text-2xl text-cyan-400 mt-1' }, selectedInsight===insight.id ? '−' : '+')
+                    ),
+                    selectedInsight===insight.id && React.createElement('div', { className: 'mt-4 pt-4 border-t border-cyan-400/20' },
+                      React.createElement('p', { className: 'text-slate-200 leading-relaxed' }, locale==='en' ? insight.detailsEn : insight.detailsTr)
+                    )
+                  )
+                ),
+                React.createElement('div', { className: 'rounded-xl border border-cyan-400/20 bg-[#021626]/90 p-6 mt-8' },
+                  React.createElement('h4', { className: 'text-cyan-100 font-bold mb-1' }, locale==='en' ? 'From Insight to Action' : 'İçgörüden Eyleme'),
+                  React.createElement('p', { className: 'text-slate-400 text-sm mb-5' }, locale==='en' ? 'Here is how we typically help organizations move from recognising a problem to having a working system in place.' : 'Kuruluşların bir sorunu fark etmekten çalışan bir sisteme sahip olmaya geçişine genellikle bu şekilde yardımcı oluruz.'),
+                  React.createElement('div', { className: 'grid gap-4 md:grid-cols-3' },
+                    React.createElement('div', { className: 'rounded-lg border border-cyan-300/20 bg-slate-900/50 p-4' },
+                      React.createElement('h5', { className: 'text-teal-300 font-semibold mb-2' }, locale==='en' ? 'Understand Your Starting Point' : 'Başlangıç Noktanızı Anlayın'),
+                      React.createElement('ul', { className: 'text-sm text-slate-300 space-y-1' },
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Map where your controls, reporting, and delivery currently stand' : 'Kontrol, raporlama ve teslimatınızın mevcut durumunu haritalayın')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Identify the gaps most likely to cause donor or audit problems' : 'Bağışçı veya denetim sorunlarına yol açabilecek boşlukları belirleyin')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Agree on priorities before committing resources' : 'Kaynak ayırmadan önce öncelikleri belirleyin'))
+                      )
+                    ),
+                    React.createElement('div', { className: 'rounded-lg border border-cyan-300/20 bg-slate-900/50 p-4' },
+                      React.createElement('h5', { className: 'text-teal-300 font-semibold mb-2' }, locale==='en' ? 'Build the Right System' : 'Doğru Sistemi Kurun'),
+                      React.createElement('ul', { className: 'text-sm text-slate-300 space-y-1' },
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Design governance, finance, and compliance structures that fit your context' : 'Bağlamınıza uygun yönetişim, finans ve uyum yapıları tasarlayın')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Define KPIs that your team can actually use and update' : 'Ekibinizin gerçekten kullanabileceği ve güncelleyebileceği KPI\'lar belirleyin')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Create documentation donors and auditors will trust' : 'Bağışçıların ve denetçilerin güveneceği belgeler oluşturun'))
+                      )
+                    ),
+                    React.createElement('div', { className: 'rounded-lg border border-cyan-300/20 bg-slate-900/50 p-4' },
+                      React.createElement('h5', { className: 'text-teal-300 font-semibold mb-2' }, locale==='en' ? 'Embed and Sustain' : 'Yerleştirin ve Sürdürün'),
+                      React.createElement('ul', { className: 'text-sm text-slate-300 space-y-1' },
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Run the system with your team, not just alongside them' : 'Sistemi ekibinizin yanında değil, ekibinizle birlikte işletin')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Build internal capability so the system outlasts the engagement' : 'Sistemin danışmanlık sürecinin ötesine geçmesi için iç kapasite oluşturun')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Review and improve based on real delivery experience' : 'Gerçek teslimat deneyimine dayalı olarak gözden geçirin ve iyileştirin'))
+                      )
+                    )
+                  )
+                ),
+                React.createElement('div', { className: 'rounded-xl border border-amber-400/20 bg-amber-950/20 p-6' },
+                  React.createElement('h4', { className: 'text-amber-100 font-bold mb-3' }, locale==='en' ? 'Does any of this sound familiar?' : 'Bunlardan herhangi biri tanıdık geliyor mu?'),
+                  React.createElement('p', { className: 'text-amber-100/80 mb-4' }, locale==='en' ? 'If these challenges feel close to home, the best next step is a short conversation. We can quickly identify where your biggest gaps are and which package is likely to make the most difference.' : 'Bu zorluklar size yakın geliyorsa, en iyi sonraki adım kısa bir görüşmedir. En büyük boşluklarınızın nerede olduğunu ve hangi paketin en fazla fark yaratacağını hızla belirleyebiliriz.'),
+                  React.createElement('button', { onClick: ()=>onNavigate('contact'), className: 'inline-block rounded-lg bg-amber-400 text-navy px-6 py-2 font-semibold hover:bg-amber-300 transition' }, locale==='en' ? 'Book a Readiness Call' : 'Hazırlık Görüşmesi Planla')
+                )
+              )
+            );
+          case 'contact':
+            return React.createElement('section', { className: 'page-fade py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
+              React.createElement('div', { className: 'mb-12' },
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4' }, c.contact.title),
+                React.createElement('p', { className: 'text-slate-300 text-lg mb-8' }, c.contact.sub)
+              ),
+              React.createElement('div', { className: 'grid gap-8 lg:grid-cols-3' },
+                React.createElement('div', { className: 'lg:col-span-2' },
+                  React.createElement('form', { className: 'space-y-6', onSubmit:(e)=>{e.preventDefault(); setContactStatus('success'); setTimeout(()=>setContactStatus(null), 4000); } },
+                    React.createElement('div', { className: 'grid gap-6 md:grid-cols-2' },
+                      React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium text-cyan-200 mb-2' }, locale==='en' ? 'Full Name *' : 'Ad Soyad *'),
+                        React.createElement('input', { required:true, name:'name', className:'form-field', placeholder: locale==='en'?'John Doe':'Ahmet Yılmaz', style:{ borderColor: 'rgba(112, 207, 218, 0.3)', backgroundColor: 'rgba(8,25,35,0.82)', color: '#e9f6ff' } })
+                      ),
+                      React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium text-cyan-200 mb-2' }, locale==='en' ? 'Email Address *' : 'E-posta Adresi *'),
+                        React.createElement('input', { required:true, type:'email', name:'email', className:'form-field', placeholder: locale==='en'?'hello@example.com':'ornek@example.com', style:{ borderColor: 'rgba(112, 207, 218, 0.3)', backgroundColor: 'rgba(8,25,35,0.82)', color: '#e9f6ff' } })
+                      )
+                    ),
+                    React.createElement('div', { className: 'grid gap-6 md:grid-cols-2' },
+                      React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium text-cyan-200 mb-2' }, locale==='en' ? 'Organization *' : 'Kuruluş *'),
+                        React.createElement('input', { required:true, name:'org', className:'form-field', placeholder: locale==='en'?'Your Organization':'Kuruluşunuz', style:{ borderColor: 'rgba(112, 207, 218, 0.3)', backgroundColor: 'rgba(8,25,35,0.82)', color: '#e9f6ff' } })
+                      ),
+                      React.createElement('div', null,
+                        React.createElement('label', { className: 'block text-sm font-medium text-cyan-200 mb-2' }, locale==='en' ? 'Role / Title' : 'Rol / Unvan'),
+                        React.createElement('input', { name:'role', className:'form-field', placeholder: locale==='en'?'Executive Director':'Yönetici Direktörü', style:{ borderColor: 'rgba(112, 207, 218, 0.3)', backgroundColor: 'rgba(8,25,35,0.82)', color: '#e9f6ff' } })
+                      )
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('label', { className: 'block text-sm font-medium text-cyan-200 mb-2' }, locale==='en' ? 'Organization Type' : 'Kuruluş Türü'),
+                      React.createElement('div', { className: 'grid gap-3 md:grid-cols-3' },
+                        React.createElement('label', { className: 'flex items-center gap-2 text-slate-300 cursor-pointer' },
+                          React.createElement('input', { type: 'radio', name: 'org_type', value: 'nonprofit', defaultChecked: true }),
+                          React.createElement('span', null, locale==='en' ? 'Nonprofit' : 'Sivil Toplum')
+                        ),
+                        React.createElement('label', { className: 'flex items-center gap-2 text-slate-300 cursor-pointer' },
+                          React.createElement('input', { type: 'radio', name: 'org_type', value: 'enterprise' }),
+                          React.createElement('span', null, locale==='en' ? 'Enterprise' : 'Kurumsal')
+                        ),
+                        React.createElement('label', { className: 'flex items-center gap-2 text-slate-300 cursor-pointer' },
+                          React.createElement('input', { type: 'radio', name: 'org_type', value: 'hybrid' }),
+                          React.createElement('span', null, locale==='en' ? 'Hybrid/Other' : 'Hibrit/Diğer')
+                        )
+                      )
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('label', { className: 'block text-sm font-medium text-cyan-200 mb-2' }, locale==='en' ? 'What brings you to NEXNGO? *' : 'NEXNGO\'ya ne getirdi? *'),
+                      React.createElement('textarea', { required:true, name:'inquiry', rows: 6, className:'form-field', placeholder: locale==='en'?'Tell us about your challenge, initiative, or strategic priority...':'Zorluk, girişim veya stratejik önceliğinizden bize söyleyin...', style:{ borderColor: 'rgba(112, 207, 218, 0.3)', backgroundColor: 'rgba(8,25,35,0.82)', color: '#e9f6ff' } })
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('label', { className: 'flex items-center gap-3 text-slate-300 cursor-pointer' },
+                        React.createElement('input', { type: 'checkbox', name: 'privacy', defaultChecked: true }),
+                        React.createElement('span', { className: 'text-sm' }, locale==='en' ? 'I agree to have NEXNGO contact me about my inquiry and share my information with our advisory team.' : 'NEXNGO\'nın sorgulamam hakkında bana ulaşması ve bilgilerimi danışma ekibiyle paylaşması konusunda kabul ediyorum.')
+                      )
+                    ),
+                    React.createElement('button', { type:'submit', className:'w-full rounded-xl bg-gradient-to-r from-teal-400 to-cyan-400 text-navy px-6 py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-[1.01] transition' }, c.cta),
+                    contactStatus === 'success' && React.createElement('div', { className: 'rounded-lg border border-green-400/30 bg-green-950/30 p-4 text-green-100' },
+                      React.createElement('strong', null, locale==='en' ? '✓ Message Received' : '✓ İleti Alındı'),
+                      React.createElement('p', { className: 'mt-1 text-sm' }, locale==='en' ? 'Thank you for reaching out. Our team will get back to you within 2 business days.' : 'Bizimle iletişime geçtiğiniz için teşekkürler. Ekibimiz 2 iş günü içinde size geri dönecek.')
+                    )
+                  )
+                ),
+                React.createElement('div', { className: 'lg:col-span-1' },
+                  React.createElement('div', { className: 'rounded-xl border border-cyan-300/30 bg-[#062033]/80 p-6 h-fit space-y-6' },
+                    React.createElement('div', null,
+                      React.createElement('h4', { className: 'font-semibold text-cyan-100 mb-2' }, locale==='en' ? 'Contact Information' : 'İletişim Bilgileri'),
+                      React.createElement('a', { href: 'mailto:hello@nexngo.com', className: 'text-teal-300 hover:text-teal-100 break-all' }, 'hello@nexngo.com')
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('h4', { className: 'font-semibold text-cyan-100 mb-3' }, locale==='en' ? 'Response Time' : 'Yanıt Süresi'),
+                      React.createElement('p', { className: 'text-slate-300 text-sm' }, locale==='en' ? 'We aim to acknowledge your inquiry within 24 hours and schedule a call within 2 business days.' : 'Sorgulamayı 24 saat içinde yanıtlamayı ve 2 iş günü içinde bir çağrı planlamayı amaçlıyoruz.')
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('h4', { className: 'font-semibold text-cyan-100 mb-3' }, locale==='en' ? 'What to Expect' : 'Neyi Bekleyeceğiniz'),
+                      React.createElement('ul', { className: 'text-slate-300 text-sm space-y-2' },
+                        React.createElement('li', null, '1. ' + (locale==='en' ? '20-minute readiness call to understand your current pressure points' : 'Mevcut baski alanlarinizi anlamak icin 20 dakikalik hazirlik gorusmesi')),
+                        React.createElement('li', null, '2. ' + (locale==='en' ? 'Rapid diagnostic snapshot of gaps across governance, compliance, and delivery' : 'Yonetsim, uyum ve teslimat bosluklarinin hizli teshis ozeti')),
+                        React.createElement('li', null, '3. ' + (locale==='en' ? 'Recommended package and phased roadmap including strategy, policy, and procedure support' : 'Strateji, politika ve prosedur destegini iceren onerilen paket ve asamali yol haritasi'))
+                      )
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('h4', { className: 'font-semibold text-cyan-100 mb-3' }, locale==='en' ? 'Common Questions' : 'Sik Sorulan Sorular'),
+                      React.createElement('ul', { className: 'text-slate-300 text-sm space-y-2' },
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Can we start with one module? Yes, then scale in phases.' : 'Tek bir modul ile baslayabilir miyiz? Evet, sonra asamali buyutebiliriz.')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Do you work with smaller NGOs? Yes, package scope can be adjusted.' : 'Kucuk STK\'larla calisiyor musunuz? Evet, paket kapsami uyarlanabilir.')),
+                        React.createElement('li', null, '• ' + (locale==='en' ? 'Will you also support policy and procedure writing? Yes, this is part of our delivery.' : 'Politika ve prosedur yaziminda da destek veriyor musunuz? Evet, bu teslimatimizin bir parcasidir.'))
+                      )
+                    ),
+                    React.createElement('div', { className: 'rounded-lg border border-cyan-400/20 bg-slate-900/50 p-4' },
+                      React.createElement('p', { className: 'text-xs text-slate-400' }, locale==='en' ? 'By submitting this form, you agree that NEXNGO may use your contact information to get in touch regarding your inquiry, in accordance with our privacy practices.' : 'Bu formu göndererek, NEXNGO\'nın sorgulamınız hakkında iletişim kurmak için iletişim bilgilerinizi kullanabileceğini kabul edersiniz.')
+                    )
+                  )
+                )
+              )
+            );
+          case 'packages':
+            return React.createElement('section', { className: 'page-fade relative py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
+              React.createElement('div', { className: 'mb-12' },
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4' }, locale==='en' ? 'Solution Packages' : 'Çözüm Paketleri'),
+                React.createElement('p', { className: 'text-slate-300 text-lg max-w-3xl mb-8' }, locale==='en' ? 'Pre-configured combinations of our 14-module system, designed to address specific NGO challenges and maturity levels. Each package combines core modules with targeted timeframes and investments, plus strategy, policy, and procedure development support.' : 'Belirli STK zorlukları ve olgunluk seviyelerini ele almak için tasarlanmış, 14 modüllü sistemimizin önceden yapılandırılmış kombinasyonları. Her paket, hedeflenen zaman çerçeveleri ve yatırımlarla çekirdek modülleri; ayrıca strateji, politika ve prosedür geliştirme desteğini birleştirir.')
+              ),
+              React.createElement('div', { className: 'grid gap-6 lg:grid-cols-2' },
+                c.solutions.packages.map((pkg) => {
+                  const isExpanded = selectedPackage === pkg.id;
+                  const detail = packageDetails[locale][pkg.id];
+
+                  return React.createElement('div', { key: pkg.id, className: `rounded-xl border p-6 transition sys-card ${isExpanded ? 'border-cyan-300 bg-[#0d3c54]' : 'border-cyan-300/25 bg-[#041f2f]/80 hover:border-cyan-300/50'}` },
+                    React.createElement('div', { className: 'flex items-start gap-4 mb-4' },
+                      React.createElement('div', { className: 'inline-flex items-center justify-center w-12 h-12 rounded-full bg-cyan-400/20 border border-cyan-400/50' },
+                        React.createElement('span', { className: 'text-cyan-300 font-bold' }, pkg.id)
+                      ),
+                      React.createElement('div', { className: 'flex-1 pr-4' },
+                        React.createElement('h3', { className: 'text-2xl font-bold text-cyan-100 mb-2' }, pkg.name),
+                        React.createElement('p', { className: 'text-slate-300 text-sm' }, pkg.desc)
+                      ),
+                      React.createElement('button', {
+                        type: 'button',
+                        onClick: () => setSelectedPackage(isExpanded ? null : pkg.id),
+                        className: 'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-cyan-400/40 bg-slate-900/40 text-2xl text-cyan-300 transition hover:bg-slate-800/70'
+                      }, isExpanded ? '−' : '+')
+                    ),
+                    React.createElement('div', { className: 'grid grid-cols-2 gap-2 mb-4' },
+                      React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-teal-300/20 p-2' },
+                        React.createElement('p', { className: 'text-xs text-teal-300 font-semibold' }, locale==='en' ? 'Duration' : 'Süre'),
+                        React.createElement('p', { className: 'text-slate-200 text-sm' }, pkg.time)
+                      ),
+                      React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-amber-300/20 p-2' },
+                        React.createElement('p', { className: 'text-xs text-amber-300 font-semibold' }, locale==='en' ? 'Level' : 'Seviye'),
+                        React.createElement('p', { className: 'text-slate-200 text-sm' }, pkg.price)
+                      )
+                    ),
+                    isExpanded && React.createElement('div', { className: 'mt-5 pt-5 border-t border-cyan-400/20 space-y-4' },
+                      React.createElement('p', { className: 'text-slate-200 leading-relaxed' }, detail.summary),
+                      React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-cyan-300/20 p-3' },
+                        React.createElement('p', { className: 'text-xs text-cyan-300 font-semibold uppercase mb-1' }, locale==='en' ? 'Best For' : 'İçin En İyi'),
+                        React.createElement('p', { className: 'text-slate-200 text-sm' }, pkg.ideal)
+                      ),
+                      React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-slate-500/20 p-3' },
+                        React.createElement('p', { className: 'text-xs text-slate-400 font-semibold uppercase mb-2' }, locale==='en' ? 'Included Modules' : 'Dahil Modüller'),
+                        React.createElement('div', { className: 'flex flex-wrap gap-2' },
+                          pkg.modules.map((modNum) => {
+                            const module = c.solutions.modules.find((item) => item.num === modNum);
+                            return React.createElement('span', { key: modNum, className: 'inline-flex items-center rounded-full bg-cyan-400/20 border border-cyan-400/40 px-3 py-1 text-xs text-cyan-300' }, `${modNum}. ${module ? module.name : modNum}`);
+                          })
+                        )
+                      ),
+                      React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-amber-300/20 p-4' },
+                        React.createElement('h4', { className: 'font-semibold text-amber-200 mb-3 text-xs uppercase' }, locale==='en' ? 'Typical Outcomes' : 'Tipik Sonuçlar'),
+                        React.createElement('ul', { className: 'space-y-2 text-slate-300 text-sm' },
+                          detail.outcomes.map((item, index) => React.createElement('li', { key: index }, '• ' + item))
+                        )
+                      )
+                    ),
+                    React.createElement('button', { onClick: ()=>onNavigate('contact'), className: 'mt-5 w-full rounded-lg bg-cyan-400 text-navy px-4 py-2 font-semibold hover:bg-cyan-300 transition' }, locale==='en' ? 'Book a Readiness Call' : 'Hazırlık Görüşmesi Planla')
+                  );
+                })
+              ),
+              React.createElement('div', { className: 'mt-16' },
+                React.createElement('div', { className: 'rounded-xl border border-cyan-300/30 bg-[#062033]/80 p-8 text-center' },
+                  React.createElement('h3', { className: 'text-2xl font-bold text-cyan-100 mb-3' }, locale==='en' ? 'Optional Add-On Services' : 'İsteğe Bağlı Ek Hizmetler'),
+                  React.createElement('p', { className: 'text-slate-300 mb-6 max-w-2xl mx-auto' }, locale==='en' ? 'Enhance any package with specialized services designed to maximize impact, compliance, and the quality of your internal strategy, policy, and procedure framework.' : 'Etkiyi, uyumluluğu ve kurum içi strateji-politika-prosedür çerçevenizin kalitesini artırmak için tasarlanmış uzmanlaşmış hizmetlerle herhangi bir paketi geliştirin.'),
+                  React.createElement('div', { className: 'grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-6' },
+                    c.solutions.addons.map((addon) => React.createElement('div', { key: addon.id, className: 'rounded-lg border border-amber-300/30 bg-amber-950/20 p-4' },
+                      React.createElement('h4', { className: 'font-semibold text-amber-100 text-sm mb-2' }, addon.name),
+                      React.createElement('p', { className: 'text-xs text-slate-300 mb-2' }, addon.desc),
+                      React.createElement('div', { className: 'flex flex-wrap gap-1' },
+                        React.createElement('span', { className: 'inline-block rounded-full bg-amber-400/10 border border-amber-300/30 px-2 py-1 text-xs text-amber-200' }, addon.timing)
+                      )
+                    ))
+                  ),
+                  React.createElement('button', { onClick: ()=>onNavigate('contact'), className: 'inline-flex items-center gap-2 rounded-lg bg-amber-400 text-navy px-6 py-2 font-semibold hover:bg-amber-300 transition' }, locale==='en' ? 'Book a Readiness Call' : 'Hazırlık Görüşmesi Planla')
+                )
+              )
+            );
+          case 'addons':
+            return React.createElement('section', { className: 'page-fade relative py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
+              React.createElement('div', { className: 'mb-12' },
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4' }, locale==='en' ? 'Add-On Services' : 'Ek Hizmetler'),
+                React.createElement('p', { className: 'text-slate-300 text-lg max-w-3xl mb-8' }, locale==='en' ? 'Specialized services that complement any package, designed to address unique needs and maximize the impact of your system implementation.' : 'Herhangi bir paketi tamamlayan ve benzersiz ihtiyaçları ele almak ve sistem uygulamanızın etkisini maksimize etmek için tasarlanmış uzmanlaşmış hizmetler.')
+              ),
+              React.createElement('div', { className: 'space-y-6' },
+                c.solutions.addons.map((addon) => React.createElement('div', { key: addon.id, className: 'rounded-xl border border-amber-300/25 bg-[#041f2f]/80 p-6 hover:border-amber-300/50 transition sys-card' },
+                  React.createElement('div', { className: 'flex items-start gap-4 mb-4' },
+                    React.createElement('div', { className: 'flex-shrink-0 w-10 h-10 rounded-full bg-amber-400/20 border border-amber-400/50 flex items-center justify-center' },
+                      React.createElement('span', { className: 'text-amber-300 font-bold' }, addon.id)
+                    ),
+                    React.createElement('div', { className: 'flex-1' },
+                      React.createElement('h3', { className: 'text-xl font-bold text-amber-100 mb-2' }, addon.name),
+                      React.createElement('p', { className: 'text-slate-200 text-sm mb-3' }, addon.desc)
+                    )
+                  ),
+                  React.createElement('div', { className: 'grid gap-4 md:grid-cols-2' },
+                    React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-teal-300/20 p-3' },
+                      React.createElement('h4', { className: 'font-semibold text-teal-300 mb-1 text-xs uppercase' }, locale==='en' ? 'Key Benefit' : 'Ana Fayda'),
+                      React.createElement('p', { className: 'text-slate-300' }, addon.benefit)
+                    ),
+                    React.createElement('div', { className: 'rounded-lg bg-slate-900/40 border border-cyan-300/20 p-3' },
+                      React.createElement('h4', { className: 'font-semibold text-cyan-300 mb-1 text-xs uppercase' }, locale==='en' ? 'When to Add' : 'Ne Zaman Ekle'),
+                      React.createElement('p', { className: 'text-slate-300' }, addon.timing)
+                    )
+                  )
+                ))
+              ),
+              React.createElement('div', { className: 'mt-12 rounded-xl border border-cyan-300/30 bg-[#062033]/80 p-8 text-center' },
+                React.createElement('h3', { className: 'text-2xl font-bold text-cyan-100 mb-3' }, locale==='en' ? 'Ready to Build Your Solution?' : 'Çözümünüzü Oluşturmaya Hazır Mısınız?'),
+                React.createElement('p', { className: 'text-slate-300 mb-6' }, locale==='en' ? 'Combine any package with add-ons to create a custom solution tailored to your organization.' : 'Organizasyonunuza özel bir çözüm oluşturmak için herhangi bir paketi ek hizmetlerle birleştirin.'),
+                React.createElement('button', { onClick: ()=>onNavigate('contact'), className: 'inline-flex items-center gap-2 rounded-lg bg-cyan-400 text-navy px-6 py-2 font-semibold hover:bg-cyan-300 transition' }, locale==='en' ? 'Book a Readiness Call' : 'Hazırlık Görüşmesi Planla')
+              )
+            );
+          
+          case 'home':
+          default:
+            return React.createElement('section', { className:'page-fade relative py-20 px-6 sm:px-10 lg:px-14 mx-auto section-max min-h-[calc(100vh-88px)] overflow-hidden' },
+              React.createElement('div', { className:'hero-grid' }),
+              React.createElement('div', { className:'hero-particles overflow-layer' },
+                Array.from({ length: 30 }, (_, i) => React.createElement('span', { key:i, className:'hero-particle', style: { left:`${(i*7)%96}%`, top:`${20+(i*3)%60}%`, '--p-time': `${5+Math.random()*8}s` } }))
+              ),
+              React.createElement('div', { className:'layered relative z-10 flex flex-col gap-8' },
+                React.createElement('div', { className:'home-panel p-8 rounded-3xl border border-cyan-300/30 shadow-2xl' },
+                  React.createElement('h1', { className:'text-3xl md:text-5xl font-bold text-white leading-tight mb-4 max-w-4xl' }, c.heroTitle),
+                  React.createElement('p', { className:'text-slate-200 text-base md:text-lg mb-6 max-w-3xl' }, c.heroSub),
+                  React.createElement('div', { className:'mb-6 flex flex-wrap gap-2' },
+                    (locale==='en'
+                      ? ['14 operating modules', '8-12 week core setup', 'Packages for each maturity stage']
+                      : ['14 operasyon modulu', '8-12 haftada cekirdek kurulum', 'Her olgunluk seviyesi icin paketler']
+                    ).map((item, idx) => React.createElement('span', { key:idx, className:'inline-flex items-center rounded-full border border-cyan-400/35 bg-cyan-900/25 px-3 py-1 text-xs text-cyan-100' }, item))
+                  ),
+                  React.createElement('div', { className:'flex flex-wrap gap-3' },
+                    React.createElement('button', { onClick: ()=>setPage('nonprofits'), className:'rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 text-navy px-6 py-3 font-semibold text-sm shadow-lg hover:scale-[1.02] transition-transform' }, c.nav[2]),
+                    React.createElement('button', { onClick: ()=>setPage('businesses'), className:'rounded-xl border border-cyan-400 px-6 py-3 text-cyan-100 text-sm hover:bg-slate-800 transition' }, c.nav[3])
+                  ),
+                  React.createElement('p', { className:'mt-4 text-sm text-slate-300' }, locale==='en' ? 'No long-term lock-in. We work in phased milestones with clear checkpoints.' : 'Uzun donemli baglilik zorunlu degil. Net kontrol noktalarina sahip asamali kilometre taslariyla ilerliyoruz.')
+                ),
+                React.createElement('div', { className:'sys-visual rounded-3xl p-6 overflow-hidden bg-slate-900/25 border border-cyan-400/20' },
+                  nodeData.map(node => React.createElement('div', {
+                    key: node.id,
+                    className:`sys-node ${hoverNode===node.id ? 'hovered' : ''}`,
+                    style:{ left: node.x, top: node.y },
+                    onMouseEnter: ()=>setHoverNode(node.id),
+                    onMouseLeave: ()=>setHoverNode(null),
+                    onClick: ()=>setSelectedNode(node.id)
+                  },
+                    React.createElement('strong', null, node.label),
+                    React.createElement('div', { className:`sys-detail ${hoverNode===node.id ? 'sys-detail-active' : ''}` }, hoverNode===node.id ? node.details : null)
+                  )),
+                  lines.map((line, i) => {
+                    const f = nodeData.find(n=>n.id===line[0]); const t=nodeData.find(n=>n.id===line[1]);
+                    if(!f||!t) return null;
+                    const x1 = parseFloat(f.x); const y1 = parseFloat(f.y); const x2 = parseFloat(t.x); const y2 = parseFloat(t.y);
+                    const dx = x2-x1; const dy = y2-y1; const dist = Math.sqrt(dx*dx+dy*dy);
+                    const angle = Math.atan2(dy, dx) * 180/Math.PI;
+                    return React.createElement('span', { key:i, className:'sys-line', style:{ left:`calc(${f.x} + 68px)`, top:`calc(${f.y} + 22px)`, height:`${dist*1.15}px`, transform:`rotate(${angle}deg)` , opacity: hoverNode===f.id||hoverNode===t.id ? 1 : 0.45, background: hoverNode===f.id||hoverNode===t.id ? 'rgba(46,255,214,0.92)' : 'rgba(46,196,182,0.35)' } });
+                  }),
+                  selectedNodeData && React.createElement('div', { className:'mt-6 p-5 rounded-xl border border-cyan-300/30 bg-[#041f2f]/95 shadow-xl' },
+                    React.createElement('div', { className:'mb-4 pb-4 border-b border-cyan-400/20' },
+                      React.createElement('h4', { className:'text-cyan-200 text-xs font-semibold uppercase tracking-wider' }, locale==='en' ? 'System Node Details' : 'Sistem Düğümü Detayları'),
+                      React.createElement('h3', { className:'text-white text-2xl font-bold mt-2' }, selectedNodeData.label)
+                    ),
+                    React.createElement('p', { className:'text-slate-300 text-sm leading-relaxed mb-5' }, selectedNodeData.details),
+                    React.createElement('div', { className:'space-y-2 mb-5' },
+                      React.createElement('h5', { className:'text-cyan-300 text-xs font-semibold uppercase mb-3' }, locale==='en' ? 'Performance Metrics' : 'Performans Metrikleri'),
+                      React.createElement('div', { className:'grid gap-3 md:grid-cols-2' },
+                        Object.entries(nodeMetrics[selectedNodeData.id] || {}).map(([k,v]) => React.createElement('div', { key:k, className:'rounded-lg bg-slate-900/60 p-3 border border-cyan-300/25 hover:border-cyan-300/50 transition' },
+                          React.createElement('div', { className:'text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1' }, k.replace(/([A-Z])/g, ' $1').trim()),
+                          React.createElement('div', { className:'text-sm text-cyan-100 font-semibold' }, v)
+                        ))
+                      )
+                    ),
+                    React.createElement('button', { className:'w-full rounded-lg border border-cyan-300 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 font-semibold hover:bg-cyan-300/20 transition', onClick: ()=>onNavigate('solutions') }, locale==='en' ? '→ Explore Related Solutions' : '→ Ilgili Cozumleri Inceleyin')
+                  )
+                ),
+                React.createElement('div', { className:'grid gap-4 lg:grid-cols-3' },
+                  serviceItems.map(item => React.createElement('button', {
+                    key:item.id,
+                    className:`sys-card interactive-card flex h-full flex-col items-center text-center ${activeService===item.id ? 'shadow-2xl border-cyan-300' : 'border-cyan-300/30'}`,
+                    onClick: ()=>onNavigate(item.id === 'strategy' ? 'solutions' : item.id === 'data' ? 'insights' : 'approach'),
+                    onMouseEnter: ()=>setActiveService(item.id),
+                    onMouseLeave: ()=>setActiveService(null)
+                  },
+                    React.createElement('h3', { className:'text-lg font-semibold text-cyan-100 mb-2' }, item.label),
+                    React.createElement('p', { className:'text-slate-200 text-sm' }, item.description),
+                    React.createElement('div', { className:'mt-4 w-full pt-4 border-t border-cyan-400/20' },
+                      React.createElement('div', { className:'text-xs text-teal-300 font-semibold mb-2' }, locale==='en' ? 'System Nodes:' : 'Sistem Düğümleri:'),
+                      React.createElement('div', { className:'flex flex-wrap justify-center gap-1.5' },
+                        item.nodes.map((nodeId, idx) => {
+                          const node = nodeData.find(n => n.id === nodeId);
+                          return React.createElement('span', { 
+                            key: idx, 
+                            className: 'inline-flex items-center gap-1 rounded-full bg-cyan-900/40 border border-cyan-500/40 px-2.5 py-0.5 text-xs text-cyan-200',
+                            onMouseEnter: ()=>setHoverNode(nodeId),
+                            onMouseLeave: ()=>setHoverNode(null)
+                          }, 
+                            React.createElement('span', { className:'w-1 h-1 rounded-full bg-cyan-400' }),
+                            node ? node.label : nodeId
+                          );
+                        })
+                      )
+                    ),
+                    React.createElement('div', { className:'mt-4 text-xs text-teal-300 text-center' }, activeService===item.id ? (locale==='en' ? 'Click to open section' : 'Açmak için tıklayın') : (locale==='en' ? 'Hover to preview connections' : 'Bağlantıları görmek için üzerine gelin'))
+                  ))
+                ),
+                React.createElement('div', { className:'mt-12 rounded-3xl border border-cyan-300/25 bg-gradient-to-b from-[#062033] to-[#041f2f] p-8 overflow-hidden relative' },
+                  React.createElement('div', { className:'absolute inset-0 bg-radial-gradient opacity-10' }),
+                  React.createElement('div', { className:'relative z-10' },
+                    React.createElement('div', { className:'mb-8' },
+                      React.createElement('h2', { className:'text-3xl md:text-4xl font-bold text-white mb-2' }, locale==='en' ? 'Ready-Made Solution Packages' : 'Hazır Çözüm Paketleri'),
+                      React.createElement('p', { className:'text-slate-300 text-lg' }, locale==='en' ? "Pre-configured paths tailored to your NGO's stage, plus support for strategy, policy, and procedure development." : "STK'nizin asamasina ve ihtiyaclarina uyarlanmis onceden yapilandirilmis yollar; strateji, politika ve prosedur gelistirme destegiyle birlikte.")
+                    ),
+                    React.createElement('div', { className:'grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6' },
+                      c.solutions.packages.slice(0, 4).map((pkg) => React.createElement('div', { key: pkg.id, className:'group relative rounded-xl border border-cyan-300/30 bg-[#041f2f]/80 p-4 hover:border-cyan-300/60 hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105', onClick: ()=>onNavigate('packages') },
+                        React.createElement('div', { className:'flex items-start justify-between mb-3' },
+                          React.createElement('div', { className:'w-8 h-8 rounded-full bg-cyan-400/30 border border-cyan-400/60 flex items-center justify-center' },
+                            React.createElement('span', { className:'text-cyan-300 font-bold text-xs' }, pkg.id)
+                          ),
+                          React.createElement('span', { className:'text-xs font-semibold px-2 py-1 rounded-full bg-teal-900/40 border border-teal-400/40 text-teal-300' }, pkg.time)
+                        ),
+                        React.createElement('h3', { className:'text-sm font-bold text-cyan-100 mb-1' }, pkg.name),
+                        React.createElement('p', { className:'text-xs text-slate-300 mb-3 line-clamp-2' }, pkg.desc),
+                        React.createElement('p', { className:'text-xs text-teal-200/90 mb-3 line-clamp-2' }, `${locale==='en' ? 'Best for:' : 'En uygun:'} ${pkg.ideal}`),
+                        React.createElement('div', { className:'flex flex-wrap gap-1 mb-3' },
+                          pkg.modules.slice(0, 3).map((modNum) => React.createElement('span', { key: modNum, className:'text-xs px-1.5 py-0.5 rounded bg-cyan-400/20 border border-cyan-400/30 text-cyan-300' }, modNum)),
+                          pkg.modules.length > 3 ? React.createElement('span', { className:'text-xs text-slate-400' }, `+${pkg.modules.length - 3} ${locale==='en' ? 'more' : 'daha'}`) : null
+                        ),
+                        React.createElement('div', { className:'mt-3 pt-3 border-t border-cyan-400/10 opacity-0 group-hover:opacity-100 transition-opacity' },
+                          React.createElement('p', { className:'text-xs text-teal-300 font-semibold' }, locale==='en' ? '→ View Full Package' : '→ Tam Paketi Göster')
+                        )
+                      ))
+                    ),
+                    React.createElement('div', { className:'flex items-center justify-between p-4 rounded-lg bg-cyan-900/20 border border-cyan-400/20' },
+                      React.createElement('div', null,
+                        React.createElement('p', { className:'text-cyan-100 font-semibold mb-1' }, locale==='en' ? 'All 8 Packages + 5 Add-On Services' : 'Tüm 8 Paket + 5 Ek Hizmet'),
+                        React.createElement('p', { className:'text-sm text-slate-300' }, locale==='en' ? 'Choose a package, then add targeted services based on your donor, audit, and growth priorities.' : 'Bir paket secin, sonra bagisci, denetim ve buyume onceliklerinize gore hedefli ek hizmetleri ekleyin.')
+                      ),
+                      React.createElement('button', { onClick: ()=>onNavigate('packages'), className:'ml-auto rounded-lg bg-cyan-400 text-navy px-6 py-2 font-semibold hover:bg-cyan-300 transition whitespace-nowrap' }, locale==='en' ? 'Explore Solution Packages' : 'Cozum Paketlerini Inceleyin')
+                    )
+                  )
+                ),
+                React.createElement('div', { className:'mt-8 rounded-xl border border-cyan-400/20 bg-[#041A2A]/80 p-5' },
+                  React.createElement('h4', { className:'text-cyan-100 font-semibold mb-2' }, locale==='en' ? 'Who this is best for' : 'Kimler icin en uygun'),
+                  React.createElement('ul', { className:'list-disc list-inside text-slate-200 space-y-1' },
+                    (locale==='en'
+                      ? ['NGOs preparing for donor funding or stricter reporting', 'Organizations with recurring audit or compliance pressure', 'Teams scaling programs but lacking stable operating routines']
+                      : ['Bagisci finansmanina veya daha siki raporlamaya hazirlanan STK\'lar', 'Tekrarlayan denetim veya uyum baskisi yasayan kuruluslar', 'Programlari buyuten ancak stabil operasyon rutinleri olmayan ekipler']
+                    ).map((line, idx) => React.createElement('li', { key:idx }, line))
+                  ),
+                  React.createElement('p', { className:'text-slate-300 text-sm mt-3' }, locale==='en' ? 'Not ideal if you only want a one-off document set without implementation ownership.' : 'Yalnizca tek seferlik belge seti istiyor ve uygulama sahipligi istemiyorsaniz ideal olmayabilir.')
+                )
+              )
+            );
+        }
+      };
+
+      const onNavigate = (id) => {
+        if (!['home','about','solutions','nonprofits','businesses','approach','insights','contact','packages','addons'].includes(id)) return;
+        setPage(id);
+        setSelectedNonprofit(null);
+        setSelectedBusiness(null);
+        setActiveApproach(null);
+        setSelectedSolutionModule(null);
+        setSelectedInsight(null);
+        setSelectedPackage(null);
+        window.location.hash = id;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      return React.createElement('div', { className:'min-h-screen pb-20' },
+        React.createElement('header', { className:'fixed top-0 left-0 right-0 z-50 glass backdrop-blur-md px-4 md:px-8 py-3 flex items-center justify-between' },
+            React.createElement('div', { className:'flex items-center gap-3 md:gap-4 min-w-0' },
+              React.createElement('div', { className:'rounded-2xl border border-cyan-400/30 bg-slate-950/70 px-2 py-1 shadow-[0_0_20px_rgba(34,211,238,0.12)] shrink-0' },
+                React.createElement('img', {
+                  src:'./NEXNGO.png',
+                  alt:'NEXNGO',
+                  className:'block h-10 md:h-12 w-auto max-w-none object-contain shrink-0',
+                  loading:'eager',
+                  decoding:'async'
+                })
+              ),
+              React.createElement('span', { className:'font-semibold tracking-[0.24em] text-cyan-200 text-xs md:text-sm whitespace-nowrap'}, 'NEXNGO')
+          ),
+          React.createElement('nav', { className:'hidden md:flex items-center gap-2' },
+            navItems.map(item => {
+              if (item.id === 'solutions') {
+                return React.createElement('div', { key: item.id, className: 'dropdown-trigger relative' },
+                  React.createElement('button', {
+                    className: `nav-link rounded-lg px-3 py-2 text-sm ${page===item.id ? 'nav-link-active text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`,
+                    onClick: ()=>onNavigate(item.id)
+                  }, item.label),
+                  React.createElement('div', { className: 'dropdown-menu' },
+                    solutionsSubItems.map(sub => React.createElement('button', {
+                      key: sub.id,
+                      className: 'dropdown-link',
+                      onClick: ()=>onNavigate(sub.id)
+                    }, sub.label))
+                  )
+                );
+              }
+              return React.createElement('button', {
+                key: item.id,
+                className: `nav-link rounded-lg px-3 py-2 text-sm ${page===item.id ? 'nav-link-active text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`,
+                onClick: ()=>onNavigate(item.id)
+              }, item.label);
+            }),
+            React.createElement('button', { onClick: ()=>setLocale(locale==='en'?'tr':'en'), className:'rounded-lg border border-cyan-400/50 px-3 py-2 text-xs text-cyan-100 hover:bg-slate-800/50' }, locale==='en'?'TR':'EN'),
+            React.createElement('a', { href:'mailto:hello@nexngo.com', className:'rounded-lg bg-amber-400 px-4 py-2 font-semibold text-navy hover:bg-amber-300' }, c.cta)
+          ),
+          React.createElement('div', { className:'md:hidden flex items-center gap-2' },
+            React.createElement('button', { onClick: ()=>setLocale(locale==='en'?'tr':'en'), className:'rounded-lg border border-cyan-400/50 px-2 py-1 text-xs text-cyan-100' }, locale==='en'?'TR':'EN'),
+            React.createElement('button', { onClick: ()=>onNavigate('contact'), className:'rounded-lg bg-amber-400 px-3 py-2 text-xs font-semibold text-navy' }, c.cta)
+          )
+        ),
+        React.createElement('main', { className:'pt-20' }, renderPage()),
+        React.createElement('footer', { className:'text-center py-8 text-sm text-slate-400 border-t border-slate-800 mt-12' },
+          React.createElement('p', null, '© 2026 NEXNGO. Premium strategy, systems and execution advisory for non-profit and corporate leaders.'),
+          React.createElement('p', null, 'Adapted experience for global compliance, governance and performance operations.')
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
