@@ -1174,24 +1174,24 @@
                     const dx = x2-x1; const dy = y2-y1; const dist = Math.sqrt(dx*dx+dy*dy);
                     const angle = Math.atan2(dy, dx) * 180/Math.PI;
                     return React.createElement('span', { key:i, className:'sys-line', style:{ left:`calc(${f.x} + 68px)`, top:`calc(${f.y} + 22px)`, height:`${dist*1.15}px`, transform:`rotate(${angle}deg)` , opacity: hoverNode===f.id||hoverNode===t.id ? 1 : 0.7, background: hoverNode===f.id||hoverNode===t.id ? 'rgba(46,255,214,0.92)' : 'rgba(46,196,182,0.52)' } });
-                  }),
-                  selectedNodeData && React.createElement('div', { className:'mt-6 p-5 rounded-xl border border-cyan-300/30 bg-[#041f2f]/95 shadow-xl' },
-                    React.createElement('div', { className:'mb-4 pb-4 border-b border-cyan-400/20' },
-                      React.createElement('h4', { className:'text-cyan-200 text-xs font-semibold uppercase tracking-wider' }, locale==='en' ? 'System Node Details' : 'Sistem Düğümü Detayları'),
-                      React.createElement('h3', { className:'text-white text-2xl font-bold mt-2' }, selectedNodeData.label)
-                    ),
-                    React.createElement('p', { className:'text-slate-300 text-sm leading-relaxed mb-5' }, selectedNodeData.details),
-                    React.createElement('div', { className:'space-y-2 mb-5' },
-                      React.createElement('h5', { className:'text-cyan-300 text-xs font-semibold uppercase mb-3' }, locale==='en' ? 'Performance Metrics' : 'Performans Metrikleri'),
-                      React.createElement('div', { className:'grid gap-3 md:grid-cols-2' },
-                        Object.entries(nodeMetrics[selectedNodeData.id] || {}).map(([k,v]) => React.createElement('div', { key:k, className:'rounded-lg bg-slate-900/60 p-3 border border-cyan-300/25 hover:border-cyan-300/50 transition' },
-                          React.createElement('div', { className:'text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1' }, k.replace(/([A-Z])/g, ' $1').trim()),
-                          React.createElement('div', { className:'text-sm text-cyan-100 font-semibold' }, v)
-                        ))
-                      )
-                    ),
-                    React.createElement('button', { className:'w-full rounded-lg border border-cyan-300 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 font-semibold hover:bg-cyan-300/20 transition', onClick: ()=>onNavigate('solutions') }, locale==='en' ? '→ Explore Related Solutions' : '→ Ilgili Cozumleri Inceleyin')
-                  )
+                  })
+                ),
+                selectedNodeData && React.createElement('div', { className:'mt-4 p-5 rounded-xl border border-cyan-300/30 bg-[#041f2f]/95 shadow-xl' },
+                  React.createElement('div', { className:'mb-4 pb-4 border-b border-cyan-400/20' },
+                    React.createElement('h4', { className:'text-cyan-200 text-xs font-semibold uppercase tracking-wider' }, locale==='en' ? 'System Node Details' : 'Sistem Düğümü Detayları'),
+                    React.createElement('h3', { className:'text-white text-2xl font-bold mt-2' }, selectedNodeData.label)
+                  ),
+                  React.createElement('p', { className:'text-slate-300 text-sm leading-relaxed mb-5' }, selectedNodeData.details),
+                  React.createElement('div', { className:'space-y-2 mb-5' },
+                    React.createElement('h5', { className:'text-cyan-300 text-xs font-semibold uppercase mb-3' }, locale==='en' ? 'Performance Metrics' : 'Performans Metrikleri'),
+                    React.createElement('div', { className:'grid gap-3 md:grid-cols-2' },
+                      Object.entries(nodeMetrics[selectedNodeData.id] || {}).map(([k,v]) => React.createElement('div', { key:k, className:'rounded-lg bg-slate-900/60 p-3 border border-cyan-300/25 hover:border-cyan-300/50 transition' },
+                        React.createElement('div', { className:'text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1' }, k.replace(/([A-Z])/g, ' $1').trim()),
+                        React.createElement('div', { className:'text-sm text-cyan-100 font-semibold' }, v)
+                      ))
+                    )
+                  ),
+                  React.createElement('button', { className:'w-full rounded-lg border border-cyan-300 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 font-semibold hover:bg-cyan-300/20 transition', onClick: ()=>onNavigate('solutions') }, locale==='en' ? '→ Explore Related Solutions' : '→ Ilgili Cozumleri Inceleyin')
                 ),
                 React.createElement('p', { className:'mt-3 text-sm text-cyan-100/90 text-center' }, locale==='en' ? 'Click any node for details, then open Solutions to see how we implement it in practice.' : 'Detaylar icin herhangi bir dugume tiklayin, sonra uygulamayi gormek icin Cozumler sayfasini acin.'),
                 React.createElement('div', { className:'grid gap-4 lg:grid-cols-3' },
