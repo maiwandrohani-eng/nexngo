@@ -57,10 +57,12 @@
       border-radius: 16px; background: rgba(8,28,40,0.88);
       border: 1px solid rgba(44,220,214,0.35);
       box-shadow: 0 0 28px rgba(7,152,160,0.25);
-      cursor: pointer; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+      cursor: pointer; overflow: hidden;
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease, opacity .25s ease;
     }
     .sys-line { position: absolute; width: 2px; background: rgba(44,220,214,0.45); transform-origin: top; transition: background .25s ease, opacity .25s ease; }
     .sys-node.hovered { transform: translateY(-6px) scale(1.05); box-shadow: 0 0 28px rgba(31, 242, 237, 0.6); border-color: rgba(44,220,214,0.8); }
+    .sys-node.is-muted { opacity: 0.42; }
     .sys-node-teaser {
       margin-top: 0.35rem;
       font-size: 11px;
@@ -71,7 +73,23 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      transition: opacity .2s ease, max-height .2s ease, margin .2s ease;
     }
+    .sys-node-teaser.hidden { opacity: 0; max-height: 0; margin-top: 0; min-height: 0; }
+    .sys-node-brief {
+      margin-top: 0;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      font-size: 11px;
+      line-height: 1.25rem;
+      color: rgba(215, 252, 255, 0.98);
+      transition: opacity .2s ease, max-height .2s ease, margin .2s ease;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    .sys-node-brief.visible { margin-top: 0.35rem; max-height: 4rem; opacity: 1; }
     .overflow-layer { position: absolute; inset: 0; pointer-events: none;}
     @keyframes drift { 0% { transform: translateY(0) scale(1.1); } 100% { transform: translateY(-34px) scale(1.1); } }
     @keyframes particleRise { 0% { transform: translate(0, 120%); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(0, -30%); opacity: 0; } }
@@ -119,7 +137,6 @@
       const [page, setPage] = useState(validPages.includes(initialPage) ? initialPage : 'home');
       const [locale, setLocale] = useState('en');
       const [hoverNode, setHoverNode] = useState(null);
-      const [selectedNode, setSelectedNode] = useState(null);
       const [activeService, setActiveService] = useState(null);
       const [selectedNonprofit, setSelectedNonprofit] = useState(null);
       const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -381,16 +398,6 @@
             : 'Bagisci raporlamasi, denetime hazirlik ve yonetici kararlarinin ayni veri gercegini kullanmasi icin ortak bir kanit ve KPI yapisi olusturur.'
         }
       ];
-
-      const selectedNodeData = nodeData.find(node => node.id === selectedNode);
-
-      const nodeMetrics = {
-        governance: { compliance: '98%', reviewCycle: 'weekly', controls: 'active' },
-        finance: { burnRate: '4.7%/m', forecastAccuracy: '93%', audits: 'upcoming' },
-        operations: { throughput: '1.5x', incidentRate: '0.8%', cycleTime: '2.3d' },
-        programs: { beneficiaryReach: '2.1M', impactScore: '87', retention: '78%' },
-        reporting: { dashboards: 12, integrationStatus: 'green', latency: '600ms' }
-      };
 
       const lines = [
         ['governance','reporting'],
@@ -1156,44 +1163,31 @@
                   React.createElement('p', { className:'text-slate-300 text-sm md:text-base max-w-3xl' }, locale==='en' ? 'Five connected capabilities that make your organization donor-ready, audit-ready, and operationally stable.' : 'Kurulusunuzu bagisciya hazir, denetime hazir ve operasyonel olarak stabil hale getiren bes bagli yetkinlik.')
                 ),
                 React.createElement('div', { className:'sys-visual rounded-3xl p-6 overflow-hidden bg-slate-900/25 border border-cyan-400/20' },
-                  nodeData.map(node => React.createElement('div', {
-                    key: node.id,
-                    className:`sys-node ${hoverNode===node.id ? 'hovered' : ''}`,
-                    style:{ left: node.x, top: node.y },
-                    onMouseEnter: ()=>setHoverNode(node.id),
-                    onMouseLeave: ()=>setHoverNode(null),
-                    onClick: ()=>setSelectedNode(selectedNode===node.id ? null : node.id)
-                  },
-                    React.createElement('strong', null, node.label),
-                    React.createElement('div', { className:'sys-node-teaser' }, node.teaser)
-                  )),
+                  nodeData.map(node => {
+                    const isActive = hoverNode === node.id;
+                    const hasHover = hoverNode !== null;
+                    return React.createElement('div', {
+                      key: node.id,
+                      className:`sys-node ${isActive ? 'hovered' : ''} ${hasHover && !isActive ? 'is-muted' : ''}`,
+                      style:{ left: node.x, top: node.y },
+                      onMouseEnter: ()=>setHoverNode(node.id),
+                      onMouseLeave: ()=>setHoverNode(null)
+                    },
+                      React.createElement('strong', null, node.label),
+                      React.createElement('div', { className:`sys-node-teaser ${hasHover && !isActive ? 'hidden' : ''}` }, node.teaser),
+                      React.createElement('div', { className:`sys-node-brief ${isActive ? 'visible' : ''}` }, node.details)
+                    );
+                  }),
                   lines.map((line, i) => {
                     const f = nodeData.find(n=>n.id===line[0]); const t=nodeData.find(n=>n.id===line[1]);
                     if(!f||!t) return null;
                     const x1 = parseFloat(f.x); const y1 = parseFloat(f.y); const x2 = parseFloat(t.x); const y2 = parseFloat(t.y);
                     const dx = x2-x1; const dy = y2-y1; const dist = Math.sqrt(dx*dx+dy*dy);
                     const angle = Math.atan2(dy, dx) * 180/Math.PI;
-                    return React.createElement('span', { key:i, className:'sys-line', style:{ left:`calc(${f.x} + 68px)`, top:`calc(${f.y} + 22px)`, height:`${dist*1.15}px`, transform:`rotate(${angle}deg)` , opacity: hoverNode===f.id||hoverNode===t.id ? 1 : 0.7, background: hoverNode===f.id||hoverNode===t.id ? 'rgba(46,255,214,0.92)' : 'rgba(46,196,182,0.52)' } });
+                    return React.createElement('span', { key:i, className:'sys-line', style:{ left:`calc(${f.x} + 68px)`, top:`calc(${f.y} + 22px)`, height:`${dist*1.15}px`, transform:`rotate(${angle}deg)` , opacity: hoverNode===f.id||hoverNode===t.id ? 1 : (hoverNode ? 0.2 : 0.7), background: hoverNode===f.id||hoverNode===t.id ? 'rgba(46,255,214,0.92)' : 'rgba(46,196,182,0.52)' } });
                   })
                 ),
-                selectedNodeData && React.createElement('div', { className:'mt-4 p-5 rounded-xl border border-cyan-300/30 bg-[#041f2f]/95 shadow-xl' },
-                  React.createElement('div', { className:'mb-4 pb-4 border-b border-cyan-400/20' },
-                    React.createElement('h4', { className:'text-cyan-200 text-xs font-semibold uppercase tracking-wider' }, locale==='en' ? 'System Node Details' : 'Sistem Düğümü Detayları'),
-                    React.createElement('h3', { className:'text-white text-2xl font-bold mt-2' }, selectedNodeData.label)
-                  ),
-                  React.createElement('p', { className:'text-slate-300 text-sm leading-relaxed mb-5' }, selectedNodeData.details),
-                  React.createElement('div', { className:'space-y-2 mb-5' },
-                    React.createElement('h5', { className:'text-cyan-300 text-xs font-semibold uppercase mb-3' }, locale==='en' ? 'Performance Metrics' : 'Performans Metrikleri'),
-                    React.createElement('div', { className:'grid gap-3 md:grid-cols-2' },
-                      Object.entries(nodeMetrics[selectedNodeData.id] || {}).map(([k,v]) => React.createElement('div', { key:k, className:'rounded-lg bg-slate-900/60 p-3 border border-cyan-300/25 hover:border-cyan-300/50 transition' },
-                        React.createElement('div', { className:'text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1' }, k.replace(/([A-Z])/g, ' $1').trim()),
-                        React.createElement('div', { className:'text-sm text-cyan-100 font-semibold' }, v)
-                      ))
-                    )
-                  ),
-                  React.createElement('button', { className:'w-full rounded-lg border border-cyan-300 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 font-semibold hover:bg-cyan-300/20 transition', onClick: ()=>onNavigate('solutions') }, locale==='en' ? '→ Explore Related Solutions' : '→ Ilgili Cozumleri Inceleyin')
-                ),
-                React.createElement('p', { className:'mt-3 text-sm text-cyan-100/90 text-center' }, locale==='en' ? 'Click any node for details, then open Solutions to see how we implement it in practice.' : 'Detaylar icin herhangi bir dugume tiklayin, sonra uygulamayi gormek icin Cozumler sayfasini acin.'),
+                React.createElement('p', { className:'mt-3 text-sm text-cyan-100/90 text-center' }, locale==='en' ? 'Hover a node to reveal a short brief. Move the cursor away to return to the normal view.' : 'Kisa ozeti gormek icin dugumun uzerine gelin. Imleci cekince normal gorunume doner.'),
                 React.createElement('div', { className:'grid gap-4 lg:grid-cols-3' },
                   serviceItems.map(item => React.createElement('button', {
                     key:item.id,
