@@ -321,11 +321,56 @@
       ];
 
       const nodeData = [
-        { id:'governance', label: locale==='en'?'Governance':'Yönetişim', x:'12%', y:'24%', details: locale==='en' ? 'Governance node - mission model, compliance controls, executive oversight and policy framework links.' : 'Yönetişim düğümü - misyon modeli, uyum kontrolleri, yönetici denetimi ve politika çerçevesi bağlantıları.' },
-        { id:'finance', label: locale==='en'?'Finance':'Finans', x:'62%', y:'18%', details: locale==='en' ? 'Finance node - integrated budget controls, multi-source revenue tracking, and grants liability analytics.' : 'Finans düğümü - entegre bütçe kontrolleri, çok kaynaklı gelir izleme ve hibe yükümlülük analitiği.' },
-        { id:'operations', label: locale==='en'?'Operations':'Operasyon', x:'14%', y:'64%', details: locale==='en' ? 'Operations node - process orchestration, capacity planning, and delivery unit KPI telemetry.' : 'Operasyon düğümü - süreç orkestrasyonu, kapasite planlaması ve teslimat birimi KPI telemetri.' },
-        { id:'programs', label: locale==='en'?'Programs':'Programlar', x:'64%', y:'64%', details: locale==='en' ? 'Programs node - impact lifecycle, beneficiary data pipes, and outcomes compliance tracking.' : 'Programlar düğümü - etki yaşam döngüsü, yararlanıcı veri boruları ve sonuç uyum takibi.' },
-        { id:'reporting', label: locale==='en'?'Reporting':'Raporlama', x:'39%', y:'46%', details: locale==='en' ? 'Reporting node - real-time KPI dashboards, governance scorecards, and audit-ready statements.' : 'Raporlama düğümü - gerçek zamanlı KPI panoları, yönetişim puan kartları ve denetime hazır raporlar.' }
+        {
+          id:'governance',
+          label: locale==='en'?'Governance & Risk':'Yonetisim ve Risk',
+          x:'12%',
+          y:'24%',
+          teaser: locale==='en' ? 'Decision rights and policy oversight' : 'Karar yetkileri ve politika gozetimi',
+          details: locale==='en'
+            ? 'Defines decision ownership, policy accountability, and escalation standards so leadership can govern with clarity and speed.'
+            : 'Liderligin netlik ve hizla yonetebilmesi icin karar sahipligini, politika hesap verebilirligini ve eskalasyon standartlarini tanimlar.'
+        },
+        {
+          id:'finance',
+          label: locale==='en'?'Finance & Controls':'Finans ve Kontroller',
+          x:'62%',
+          y:'18%',
+          teaser: locale==='en' ? 'Budget discipline and donor-ready controls' : 'Butce disiplini ve bagisciya hazir kontroller',
+          details: locale==='en'
+            ? 'Connects budgets, controls, and fund tracking to reduce surprises and keep financial reporting audit-ready.'
+            : 'Surprizleri azaltmak ve finansal raporlamayi denetime hazir tutmak icin butceyi, kontrolleri ve fon takibini birlestirir.'
+        },
+        {
+          id:'operations',
+          label: locale==='en'?'Operations & Capacity':'Operasyon ve Kapasite',
+          x:'14%',
+          y:'64%',
+          teaser: locale==='en' ? 'Reliable routines across teams' : 'Ekipler arasi guvenilir operasyon rutinleri',
+          details: locale==='en'
+            ? 'Builds repeatable workflows, role clarity, and execution rhythm so operations stay stable while programs scale.'
+            : 'Programlar buyurken operasyonlarin stabil kalmasi icin tekrarlanabilir is akislarini, rol netligini ve uygulama ritmini kurar.'
+        },
+        {
+          id:'programs',
+          label: locale==='en'?'Programs & Delivery':'Program ve Teslimat',
+          x:'64%',
+          y:'64%',
+          teaser: locale==='en' ? 'Execution quality from plan to impact' : 'Plandan etkiye uygulama kalitesi',
+          details: locale==='en'
+            ? 'Strengthens program planning, milestone control, and delivery governance so outcomes are consistent and measurable.'
+            : 'Sonuclarin tutarli ve olculebilir olmasi icin program planlamasini, kilometre tasi kontrolunu ve teslimat yonetisimini guclendirir.'
+        },
+        {
+          id:'reporting',
+          label: locale==='en'?'Reporting & Compliance':'Raporlama ve Uyum',
+          x:'39%',
+          y:'46%',
+          teaser: locale==='en' ? 'One trusted view for donors and leadership' : 'Bagiscilar ve liderlik icin tek guvenilir gorunum',
+          details: locale==='en'
+            ? 'Creates a shared evidence and KPI structure so donor reporting, audit readiness, and executive decisions use the same data truth.'
+            : 'Bagisci raporlamasi, denetime hazirlik ve yonetici kararlarinin ayni veri gercegini kullanmasi icin ortak bir kanit ve KPI yapisi olusturur.'
+        }
       ];
 
       const selectedNodeData = nodeData.find(node => node.id === selectedNode);
@@ -1097,6 +1142,10 @@
                   ),
                   React.createElement('p', { className:'mt-4 text-sm text-slate-300' }, locale==='en' ? 'No long-term lock-in. We work in phased milestones with clear checkpoints.' : 'Uzun donemli baglilik zorunlu degil. Net kontrol noktalarina sahip asamali kilometre taslariyla ilerliyoruz.')
                 ),
+                React.createElement('div', { className:'mb-2 px-1' },
+                  React.createElement('h2', { className:'text-2xl md:text-3xl font-bold text-white mb-2' }, locale==='en' ? 'Your Core Operating System' : 'Temel Isletim Sisteminiz'),
+                  React.createElement('p', { className:'text-slate-300 text-sm md:text-base max-w-3xl' }, locale==='en' ? 'Five connected capabilities that make your organization donor-ready, audit-ready, and operationally stable.' : 'Kurulusunuzu bagisciya hazir, denetime hazir ve operasyonel olarak stabil hale getiren bes bagli yetkinlik.')
+                ),
                 React.createElement('div', { className:'sys-visual rounded-3xl p-6 overflow-hidden bg-slate-900/25 border border-cyan-400/20' },
                   nodeData.map(node => React.createElement('div', {
                     key: node.id,
@@ -1104,10 +1153,11 @@
                     style:{ left: node.x, top: node.y },
                     onMouseEnter: ()=>setHoverNode(node.id),
                     onMouseLeave: ()=>setHoverNode(null),
-                    onClick: ()=>setSelectedNode(node.id)
+                    onClick: ()=>setSelectedNode(selectedNode===node.id ? null : node.id)
                   },
                     React.createElement('strong', null, node.label),
-                    React.createElement('div', { className:`sys-detail ${hoverNode===node.id ? 'sys-detail-active' : ''}` }, hoverNode===node.id ? node.details : null)
+                    React.createElement('div', { className:'mt-1 text-[11px] text-cyan-200/85' }, node.teaser),
+                    React.createElement('div', { className:`sys-detail mt-2 text-[11px] leading-snug text-slate-200 ${hoverNode===node.id ? 'sys-detail-active' : ''}` }, hoverNode===node.id ? node.details : null)
                   )),
                   lines.map((line, i) => {
                     const f = nodeData.find(n=>n.id===line[0]); const t=nodeData.find(n=>n.id===line[1]);
@@ -1115,7 +1165,7 @@
                     const x1 = parseFloat(f.x); const y1 = parseFloat(f.y); const x2 = parseFloat(t.x); const y2 = parseFloat(t.y);
                     const dx = x2-x1; const dy = y2-y1; const dist = Math.sqrt(dx*dx+dy*dy);
                     const angle = Math.atan2(dy, dx) * 180/Math.PI;
-                    return React.createElement('span', { key:i, className:'sys-line', style:{ left:`calc(${f.x} + 68px)`, top:`calc(${f.y} + 22px)`, height:`${dist*1.15}px`, transform:`rotate(${angle}deg)` , opacity: hoverNode===f.id||hoverNode===t.id ? 1 : 0.45, background: hoverNode===f.id||hoverNode===t.id ? 'rgba(46,255,214,0.92)' : 'rgba(46,196,182,0.35)' } });
+                    return React.createElement('span', { key:i, className:'sys-line', style:{ left:`calc(${f.x} + 68px)`, top:`calc(${f.y} + 22px)`, height:`${dist*1.15}px`, transform:`rotate(${angle}deg)` , opacity: hoverNode===f.id||hoverNode===t.id ? 1 : 0.7, background: hoverNode===f.id||hoverNode===t.id ? 'rgba(46,255,214,0.92)' : 'rgba(46,196,182,0.52)' } });
                   }),
                   selectedNodeData && React.createElement('div', { className:'mt-6 p-5 rounded-xl border border-cyan-300/30 bg-[#041f2f]/95 shadow-xl' },
                     React.createElement('div', { className:'mb-4 pb-4 border-b border-cyan-400/20' },
@@ -1135,6 +1185,7 @@
                     React.createElement('button', { className:'w-full rounded-lg border border-cyan-300 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 font-semibold hover:bg-cyan-300/20 transition', onClick: ()=>onNavigate('solutions') }, locale==='en' ? '→ Explore Related Solutions' : '→ Ilgili Cozumleri Inceleyin')
                   )
                 ),
+                React.createElement('p', { className:'mt-3 text-sm text-cyan-100/90 text-center' }, locale==='en' ? 'Click any node for details, then open Solutions to see how we implement it in practice.' : 'Detaylar icin herhangi bir dugume tiklayin, sonra uygulamayi gormek icin Cozumler sayfasini acin.'),
                 React.createElement('div', { className:'grid gap-4 lg:grid-cols-3' },
                   serviceItems.map(item => React.createElement('button', {
                     key:item.id,
@@ -1164,6 +1215,12 @@
                     ),
                     React.createElement('div', { className:'mt-4 text-xs text-teal-300 text-center' }, activeService===item.id ? (locale==='en' ? 'Click to open section' : 'Açmak için tıklayın') : (locale==='en' ? 'Hover to preview connections' : 'Bağlantıları görmek için üzerine gelin'))
                   ))
+                ),
+                React.createElement('div', { className:'rounded-xl border border-cyan-400/20 bg-[#041A2A]/85 p-4 flex flex-wrap gap-2' },
+                  (locale==='en'
+                    ? ['14 operating modules', '8-12 week core setup', 'Includes strategy, policy, and procedure support']
+                    : ['14 operasyon modulu', '8-12 haftada cekirdek kurulum', 'Strateji, politika ve prosedur gelistirme destegi dahildir']
+                  ).map((item, idx) => React.createElement('span', { key: idx, className:'inline-flex items-center rounded-full border border-cyan-400/35 bg-cyan-900/25 px-3 py-1 text-xs text-cyan-100' }, item))
                 ),
                 React.createElement('div', { className:'mt-12 rounded-3xl border border-cyan-300/25 bg-gradient-to-b from-[#062033] to-[#041f2f] p-8 overflow-hidden relative' },
                   React.createElement('div', { className:'absolute inset-0 bg-radial-gradient opacity-10' }),
