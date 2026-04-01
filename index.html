@@ -1266,7 +1266,7 @@
           case 'insights':
             return commonPage(c.insights.title,
               React.createElement('div', { className: 'space-y-6' },
-                React.createElement('p', { className: 'text-slate-300 mb-4 max-w-2xl' }, locale==='en' ? 'Practical thinking for NGO leaders on governance, compliance, and delivery. Each insight is drawn from the challenges we see most often — and what actually helps organizations move forward.' : 'STK liderleri için yönetişim, uyum ve teslimat üzerine pratik düşünceler. Her içgörü, en sık karşılaştığımız zorluklardan ve kuruluşların gerçekten ilerleme kaydetmesine yardımcı olan yaklaşımlardan doğmaktadır.'),
+                React.createElement('p', { className: 'text-slate-300 mb-4 max-w-2xl mx-auto text-center' }, locale==='en' ? 'Practical thinking for NGO leaders on governance, compliance, and delivery. Each insight is drawn from the challenges we see most often — and what actually helps organizations move forward.' : 'STK liderleri için yönetişim, uyum ve teslimat üzerine pratik düşünceler. Her içgörü, en sık karşılaştığımız zorluklardan ve kuruluşların gerçekten ilerleme kaydetmesine yardımcı olan yaklaşımlardan doğmaktadır.'),
                 insightsItems.map((insight, idx)=>
                   React.createElement('button', {
                     key: insight.id,
