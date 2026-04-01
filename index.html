@@ -230,6 +230,7 @@
       const [heroPaused, setHeroPaused] = useState(false);
       const [heroSlideVisible, setHeroSlideVisible] = useState(true);
       const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      const mobileCtaLabel = locale === 'en' ? 'Call' : 'Gorusme';
       const heroTransitionTimer = useRef(null);
       const [contactStatus, setContactStatus] = useState(null);
 
@@ -1824,18 +1825,18 @@
       };
 
       return React.createElement('div', { className:'min-h-screen pb-20' },
-        React.createElement('header', { className:'fixed top-0 left-0 right-0 z-50 glass backdrop-blur-md px-4 md:px-8 py-3 flex items-center justify-between' },
+        React.createElement('header', { className:'fixed top-0 left-0 right-0 z-50 glass backdrop-blur-md px-3 md:px-8 py-2.5 md:py-3 flex items-center justify-between' },
             React.createElement('div', { className:'flex items-center gap-3 md:gap-4 min-w-0' },
               React.createElement('div', { className:'rounded-2xl border border-cyan-400/30 bg-slate-950/70 px-2 py-1 shadow-[0_0_20px_rgba(34,211,238,0.12)] shrink-0' },
                 React.createElement('img', {
                   src:'./NEXNGO.png',
                   alt:'NEXNGO',
-                  className:'block h-10 md:h-12 w-auto max-w-none object-contain shrink-0',
+                  className:'block h-8 md:h-12 w-auto max-w-none object-contain shrink-0',
                   loading:'eager',
                   decoding:'async'
                 })
               ),
-              React.createElement('span', { className:'font-semibold tracking-[0.24em] text-cyan-200 text-xs md:text-sm whitespace-nowrap'}, 'NEXNGO')
+              React.createElement('span', { className:'hidden sm:inline font-semibold tracking-[0.24em] text-cyan-200 text-xs md:text-sm whitespace-nowrap'}, 'NEXNGO')
           ),
           React.createElement('nav', { className:'hidden md:flex items-center gap-2' },
             navItems.map(item => {
@@ -1865,12 +1866,12 @@
             React.createElement('button', { onClick: toggleLocale, className:'rounded-lg border border-cyan-400/50 px-3 py-2 text-xs text-cyan-100 hover:bg-slate-800/50', 'aria-pressed': locale!=='en' }, locale==='en'?'TR':'EN'),
             React.createElement('a', { href:'mailto:nex4ngo@gmail.com', className:'rounded-lg bg-amber-400 px-4 py-2 font-semibold text-navy hover:bg-amber-300' }, c.cta)
           ),
-          React.createElement('div', { className:'md:hidden flex items-center gap-2' },
-            React.createElement('button', { onClick: toggleLocale, className:'rounded-lg border border-cyan-400/50 px-2 py-1 text-xs text-cyan-100', 'aria-pressed': locale!=='en' }, locale==='en'?'TR':'EN'),
-            React.createElement('button', { onClick: ()=>onNavigate('contact'), className:'rounded-lg bg-amber-400 px-2.5 py-2 text-[11px] font-semibold text-navy' }, c.cta),
+          React.createElement('div', { className:'md:hidden flex items-center gap-1.5 shrink-0' },
+            React.createElement('button', { onClick: toggleLocale, className:'rounded-lg border border-cyan-400/50 px-2 py-2 text-[11px] font-semibold text-cyan-100 min-w-[44px]', 'aria-pressed': locale!=='en' }, locale==='en'?'TR':'EN'),
+            React.createElement('button', { onClick: ()=>onNavigate('contact'), className:'rounded-lg bg-amber-400 px-2.5 py-2 text-[11px] font-semibold text-navy whitespace-nowrap min-w-[96px]' }, mobileCtaLabel),
             React.createElement('button', {
               onClick: ()=>setMobileMenuOpen(!mobileMenuOpen),
-              className:'rounded-lg border border-cyan-400/50 px-2.5 py-2 text-cyan-100',
+              className:'rounded-lg border border-cyan-400/50 px-2.5 py-2 text-cyan-100 whitespace-nowrap',
               'aria-expanded': mobileMenuOpen,
               'aria-label': locale==='en' ? 'Toggle navigation menu' : 'Gezinme menusu ac kapat'
             }, mobileMenuOpen ? 'X' : 'Menu')
