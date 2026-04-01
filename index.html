@@ -200,6 +200,56 @@
         );
       };
 
+      const handleContactSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const name = (formData.get('name') || '').toString().trim();
+        const email = (formData.get('email') || '').toString().trim();
+        const org = (formData.get('org') || '').toString().trim();
+        const role = (formData.get('role') || '').toString().trim();
+        const orgType = (formData.get('org_type') || '').toString().trim();
+        const inquiry = (formData.get('inquiry') || '').toString().trim();
+        const privacy = formData.get('privacy') ? (locale === 'en' ? 'Yes' : 'Evet') : (locale === 'en' ? 'No' : 'Hayir');
+
+        const subject = locale === 'en'
+          ? `Contact Form Submission - ${org || 'NEXNGO Website'}`
+          : `Iletisim Formu Basvurusu - ${org || 'NEXNGO Web Sitesi'}`;
+
+        const bodyLines = locale === 'en'
+          ? [
+              'New contact form inquiry from NEXNGO website:',
+              '',
+              `Full Name: ${name}`,
+              `Email Address: ${email}`,
+              `Organization: ${org}`,
+              `Role / Title: ${role || '-'}`,
+              `Organization Type: ${orgType || '-'}`,
+              `Privacy Consent: ${privacy}`,
+              '',
+              'Message:',
+              inquiry
+            ]
+          : [
+              'NEXNGO web sitesinden yeni iletisim formu basvurusu:',
+              '',
+              `Ad Soyad: ${name}`,
+              `E-posta Adresi: ${email}`,
+              `Kurulus: ${org}`,
+              `Rol / Unvan: ${role || '-'}`,
+              `Kurulus Turu: ${orgType || '-'}`,
+              `Gizlilik Onayi: ${privacy}`,
+              '',
+              'Mesaj:',
+              inquiry
+            ];
+
+        const mailtoLink = `mailto:nex4ngo@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+        window.location.href = mailtoLink;
+        setContactStatus('draft');
+        setTimeout(() => setContactStatus(null), 5000);
+        e.currentTarget.reset();
+      };
+
       const nonprofitScenarios = [
         {
           id: 'grant-compliance',
@@ -1077,7 +1127,7 @@
               ),
               React.createElement('div', { className: 'grid gap-8 lg:grid-cols-3' },
                 React.createElement('div', { className: 'lg:col-span-2' },
-                  React.createElement('form', { className: 'space-y-6', onSubmit:(e)=>{e.preventDefault(); setContactStatus('success'); setTimeout(()=>setContactStatus(null), 4000); } },
+                  React.createElement('form', { className: 'space-y-6', onSubmit: handleContactSubmit },
                     React.createElement('div', { className: 'grid gap-6 md:grid-cols-2' },
                       React.createElement('div', null,
                         React.createElement('label', { className: 'block text-sm font-medium text-cyan-200 mb-2' }, locale==='en' ? 'Full Name *' : 'Ad Soyad *'),
@@ -1126,9 +1176,9 @@
                       )
                     ),
                     React.createElement('button', { type:'submit', className:'w-full rounded-xl bg-gradient-to-r from-teal-400 to-cyan-400 text-navy px-6 py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-[1.01] transition' }, c.cta),
-                    contactStatus === 'success' && React.createElement('div', { className: 'rounded-lg border border-green-400/30 bg-green-950/30 p-4 text-green-100' },
-                      React.createElement('strong', null, locale==='en' ? '✓ Message Received' : '✓ İleti Alındı'),
-                      React.createElement('p', { className: 'mt-1 text-sm' }, locale==='en' ? 'Thank you for reaching out. Our team will get back to you within 2 business days.' : 'Bizimle iletişime geçtiğiniz için teşekkürler. Ekibimiz 2 iş günü içinde size geri dönecek.')
+                    contactStatus === 'draft' && React.createElement('div', { className: 'rounded-lg border border-green-400/30 bg-green-950/30 p-4 text-green-100' },
+                      React.createElement('strong', null, locale==='en' ? '✓ Email Draft Opened' : '✓ E-posta Taslagi Acildi'),
+                      React.createElement('p', { className: 'mt-1 text-sm' }, locale==='en' ? 'Your email app should open a prefilled message to nex4ngo@gmail.com. Send it to complete your inquiry.' : 'E-posta uygulamanizda nex4ngo@gmail.com icin doldurulmus bir taslak acilmalidir. Basvurunuzu tamamlamak icin gonderin.')
                     )
                   )
                 ),
