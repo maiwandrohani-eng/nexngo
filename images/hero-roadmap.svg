@@ -1,0 +1,29 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Roadmap and milestones">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#051a2b"/>
+      <stop offset="100%" stop-color="#0f445d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <path d="M140 610 C250 470 360 470 470 610 S690 750 800 610 S1010 470 1060 610" fill="none" stroke="#86fff7" stroke-width="16" stroke-linecap="round"/>
+  <g fill="#13b7ba" stroke="#aafffb" stroke-width="4">
+    <circle cx="220" cy="565" r="34"/>
+    <circle cx="430" cy="555" r="34"/>
+    <circle cx="650" cy="665" r="34"/>
+    <circle cx="860" cy="565" r="34"/>
+    <circle cx="1030" cy="610" r="34"/>
+  </g>
+  <g fill="#eaffff" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle">
+    <text x="220" y="500">Assess</text>
+    <text x="430" y="490">Design</text>
+    <text x="650" y="730">Implement</text>
+    <text x="860" y="500">Strengthen</text>
+    <text x="1030" y="675">Scale</text>
+  </g>
+  <rect x="180" y="140" width="840" height="240" rx="24" fill="#0a3044" stroke="#6cfaf2" stroke-opacity="0.5"/>
+  <g fill="#dffefe" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="700">
+    <text x="240" y="230">Structured delivery roadmap</text>
+    <text x="240" y="290">with clear ownership and checkpoints</text>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Field operations and delivery">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d3a52"/>
+      <stop offset="100%" stop-color="#041c2f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <path d="M0 560 Q260 470 520 560 T1200 560 L1200 800 L0 800 Z" fill="#0b2d3f"/>
+  <path d="M0 620 Q260 530 520 620 T1200 620 L1200 800 L0 800 Z" fill="#10384d"/>
+  <rect x="180" y="290" width="260" height="190" rx="16" fill="#123f56" stroke="#6ffcf4" stroke-opacity="0.45"/>
+  <rect x="500" y="250" width="280" height="230" rx="16" fill="#123f56" stroke="#6ffcf4" stroke-opacity="0.45"/>
+  <rect x="840" y="310" width="190" height="170" rx="16" fill="#123f56" stroke="#6ffcf4" stroke-opacity="0.45"/>
+  <g stroke="#7dfff7" stroke-width="6" stroke-linecap="round" opacity="0.75">
+    <path d="M310 290 L310 220"/>
+    <path d="M640 250 L640 185"/>
+    <path d="M935 310 L935 245"/>
+    <path d="M310 220 L640 185"/>
+    <path d="M640 185 L935 245"/>
+  </g>
+  <g fill="#e9ffff" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700" text-anchor="middle">
+    <text x="310" y="355">Field Team A</text>
+    <text x="640" y="330">Central Hub</text>
+    <text x="935" y="375">Field Team B</text>
+  </g>
+</svg>

@@ -675,7 +675,9 @@
             primaryPage: 'nonprofits',
             secondaryLabel: c.nav[3],
             secondaryPage: 'businesses',
-            note: 'No long-term lock-in. We work in phased milestones with clear checkpoints.'
+            note: 'No long-term lock-in. We work in phased milestones with clear checkpoints.',
+            image: 'images/hero-systems.svg',
+            imageAlt: 'Connected operating system map'
           },
           {
             title: 'One Connected System, Not Isolated Fixes',
@@ -685,7 +687,21 @@
             primaryPage: 'solutions',
             secondaryLabel: 'View Packages',
             secondaryPage: 'packages',
-            note: 'Choose a package based on your current maturity stage and delivery pressure.'
+            note: 'Choose a package based on your current maturity stage and delivery pressure.',
+            image: 'images/hero-dashboard.svg',
+            imageAlt: 'Operational dashboard and decision intelligence'
+          },
+          {
+            title: 'Policies and Procedures That Teams Actually Use',
+            sub: 'We co-develop practical policies, SOPs, and governance playbooks that fit your daily reality, not just compliance documentation.',
+            chips: ['Policy architecture', 'Procedure standardization', 'Adoption support'],
+            primaryLabel: 'Book a Readiness Call',
+            primaryPage: 'contact',
+            secondaryLabel: 'About NEXNGO',
+            secondaryPage: 'about',
+            note: 'Clear documentation, ownership, and accountability from leadership to frontline teams.',
+            image: 'images/hero-team.svg',
+            imageAlt: 'Policy and procedure workshop'
           },
           {
             title: 'From Assessment to Implementation in 4 Stages',
@@ -695,7 +711,21 @@
             primaryPage: 'approach',
             secondaryLabel: c.cta,
             secondaryPage: 'contact',
-            note: 'Every stage has clear outputs, ownership, and measurable progress checkpoints.'
+            note: 'Every stage has clear outputs, ownership, and measurable progress checkpoints.',
+            image: 'images/hero-roadmap.svg',
+            imageAlt: 'Structured delivery roadmap'
+          },
+          {
+            title: 'Reliable Delivery Across Field and Remote Teams',
+            sub: 'We help distributed organizations stabilize routines, protect data, and maintain program quality across offices, field sites, and remote teams.',
+            chips: ['Field continuity', 'Remote collaboration', 'Security-minded workflows'],
+            primaryLabel: 'Explore Related Solutions',
+            primaryPage: 'businesses',
+            secondaryLabel: 'View Insights',
+            secondaryPage: 'insights',
+            note: 'Built for complex environments where consistency, visibility, and duty of care matter most.',
+            image: 'images/hero-field.svg',
+            imageAlt: 'Connected field and central operations'
           }
         ]
         : [
@@ -707,7 +737,9 @@
             primaryPage: 'nonprofits',
             secondaryLabel: c.nav[3],
             secondaryPage: 'businesses',
-            note: 'Uzun donemli baglilik zorunlu degil. Net kontrol noktalarina sahip asamali kilometre taslariyla ilerliyoruz.'
+            note: 'Uzun donemli baglilik zorunlu degil. Net kontrol noktalarina sahip asamali kilometre taslariyla ilerliyoruz.',
+            image: 'images/hero-systems.svg',
+            imageAlt: 'Bagli isletim sistemi haritasi'
           },
           {
             title: 'Parcali Cozumler Yerine Birbirine Bagli Tek Sistem',
@@ -717,7 +749,21 @@
             primaryPage: 'solutions',
             secondaryLabel: 'Paketleri Gorun',
             secondaryPage: 'packages',
-            note: 'Kurulusunuzun mevcut olgunluk seviyesine ve operasyon baskisina gore en uygun paketi secin.'
+            note: 'Kurulusunuzun mevcut olgunluk seviyesine ve operasyon baskisina gore en uygun paketi secin.',
+            image: 'images/hero-dashboard.svg',
+            imageAlt: 'Operasyon paneli ve karar gorunumu'
+          },
+          {
+            title: 'Ekibinizin Gercekten Kullandigi Politika ve Prosedurler',
+            sub: 'Sadece dokumantasyon degil, gunluk calismaya uyumlu politika, SOP ve yonetisim oyun planlarini birlikte gelistiriyoruz.',
+            chips: ['Politika mimarisi', 'Prosedur standardizasyonu', 'Benimseme destegi'],
+            primaryLabel: 'Hazirlik Gorusmesi Planla',
+            primaryPage: 'contact',
+            secondaryLabel: 'NEXNGO Hakkinda',
+            secondaryPage: 'about',
+            note: 'Liderlikten saha ekiplerine kadar net dokumantasyon, sahiplik ve hesap verebilirlik.',
+            image: 'images/hero-team.svg',
+            imageAlt: 'Politika ve prosedur atolyeleri'
           },
           {
             title: '4 Asamada Degerlendirmeden Uygulamaya',
@@ -727,7 +773,21 @@
             primaryPage: 'approach',
             secondaryLabel: c.cta,
             secondaryPage: 'contact',
-            note: 'Her asamada net ciktilar, sahiplik ve olculebilir ilerleme kontrol noktalari bulunur.'
+            note: 'Her asamada net ciktilar, sahiplik ve olculebilir ilerleme kontrol noktalari bulunur.',
+            image: 'images/hero-roadmap.svg',
+            imageAlt: 'Yapilandirilmis teslimat yol haritasi'
+          },
+          {
+            title: 'Saha ve Uzaktan Ekiplerde Guvenilir Teslimat',
+            sub: 'Dagitik yapilarda rutinleri guclendirmenize, veriyi korumaniza ve program kalitesini korumaniza destek oluyoruz.',
+            chips: ['Saha surekliligi', 'Uzaktan is birligi', 'Guvenlik odakli is akislar'],
+            primaryLabel: 'Ilgili Cozumleri Inceleyin',
+            primaryPage: 'businesses',
+            secondaryLabel: 'Icgoruleri Gorun',
+            secondaryPage: 'insights',
+            note: 'Tutarlilik, gorunurluk ve gorev guvencesinin kritik oldugu ortamlara uygun tasarlandi.',
+            image: 'images/hero-field.svg',
+            imageAlt: 'Saha ve merkez operasyon baglantilari'
           }
         ];
 
@@ -1235,17 +1295,29 @@
                   onMouseEnter: ()=>setHeroPaused(true),
                   onMouseLeave: ()=>setHeroPaused(false)
                 },
-                  React.createElement('div', { key:`hero-${locale}-${heroSlide}`, className:'hero-slide' },
-                    React.createElement('h1', { className:'text-3xl md:text-5xl font-bold text-white leading-tight mb-4 max-w-4xl' }, activeHeroSlide.title),
-                    React.createElement('p', { className:'text-slate-200 text-base md:text-lg mb-6 max-w-3xl' }, activeHeroSlide.sub),
-                    React.createElement('div', { className:'mb-6 flex flex-wrap gap-2' },
-                      activeHeroSlide.chips.map((item, idx) => React.createElement('span', { key:idx, className:'inline-flex items-center rounded-full border border-cyan-400/35 bg-cyan-900/25 px-3 py-1 text-xs text-cyan-100' }, item))
+                  React.createElement('div', { key:`hero-${locale}-${heroSlide}`, className:'hero-slide md:grid md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-6' },
+                    React.createElement('div', null,
+                      React.createElement('h1', { className:'text-3xl md:text-5xl font-bold text-white leading-tight mb-4 max-w-4xl' }, activeHeroSlide.title),
+                      React.createElement('p', { className:'text-slate-200 text-base md:text-lg mb-6 max-w-3xl' }, activeHeroSlide.sub),
+                      React.createElement('div', { className:'mb-6 flex flex-wrap gap-2' },
+                        activeHeroSlide.chips.map((item, idx) => React.createElement('span', { key:idx, className:'inline-flex items-center rounded-full border border-cyan-400/35 bg-cyan-900/25 px-3 py-1 text-xs text-cyan-100' }, item))
+                      ),
+                      React.createElement('div', { className:'flex flex-wrap gap-3' },
+                        React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.primaryPage), className:'rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 text-navy px-6 py-3 font-semibold text-sm shadow-lg hover:scale-[1.02] transition-transform' }, activeHeroSlide.primaryLabel),
+                        React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.secondaryPage), className:'rounded-xl border border-cyan-400 px-6 py-3 text-cyan-100 text-sm hover:bg-slate-800 transition' }, activeHeroSlide.secondaryLabel)
+                      ),
+                      React.createElement('p', { className:'mt-4 text-sm text-slate-300' }, activeHeroSlide.note)
                     ),
-                    React.createElement('div', { className:'flex flex-wrap gap-3' },
-                      React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.primaryPage), className:'rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 text-navy px-6 py-3 font-semibold text-sm shadow-lg hover:scale-[1.02] transition-transform' }, activeHeroSlide.primaryLabel),
-                      React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.secondaryPage), className:'rounded-xl border border-cyan-400 px-6 py-3 text-cyan-100 text-sm hover:bg-slate-800 transition' }, activeHeroSlide.secondaryLabel)
-                    ),
-                    React.createElement('p', { className:'mt-4 text-sm text-slate-300' }, activeHeroSlide.note)
+                    React.createElement('div', { className:'mt-6 md:mt-0' },
+                      React.createElement('div', { className:'overflow-hidden rounded-2xl border border-cyan-300/25 bg-[#05283b]/75 shadow-[0_18px_45px_rgba(0,0,0,0.35)]' },
+                        React.createElement('img', {
+                          src: activeHeroSlide.image,
+                          alt: activeHeroSlide.imageAlt,
+                          className: 'h-52 w-full object-cover md:h-72',
+                          loading: 'eager'
+                        })
+                      )
+                    )
                   ),
                   React.createElement('div', { className:'mt-5 flex items-center gap-2' },
                     heroSlides.map((_, idx) => React.createElement('button', {
