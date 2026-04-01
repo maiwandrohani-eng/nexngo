@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://maiwandrohani-eng.github.io/nexngo/sitemap.xml

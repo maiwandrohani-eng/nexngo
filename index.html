@@ -3,13 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NEXNGO helps nonprofits build donor-ready, audit-ready operating systems across governance, finance, compliance, and delivery." />
+  <meta name="keywords" content="NGO systems, donor readiness, audit readiness, nonprofit governance, compliance advisory, policy development" />
+  <meta name="author" content="NEXNGO" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#06141E" />
+  <link rel="canonical" href="https://maiwandrohani-eng.github.io/nexngo/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="NEXNGO | Donor-Ready NGO Systems" />
+  <meta property="og:description" content="Build stronger governance, compliance, finance, and delivery systems with strategy, policy, and procedure support." />
+  <meta property="og:url" content="https://maiwandrohani-eng.github.io/nexngo/" />
+  <meta property="og:image" content="https://maiwandrohani-eng.github.io/nexngo/NEXNGO.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NEXNGO | Donor-Ready NGO Systems" />
+  <meta name="twitter:description" content="Practical systems and advisory for nonprofits that need donor and audit readiness." />
+  <meta name="twitter:image" content="https://maiwandrohani-eng.github.io/nexngo/NEXNGO.png" />
   <title>NEXNGO | Strategy & Systems Advisory</title>
+  <link rel="preload" href="./NEXNGO.png" as="image" fetchpriority="high" />
+  <link rel="preload" href="images/hero-systems.svg" as="image" />
+  <link rel="preload" href="images/hero-dashboard.svg" as="image" />
+  <link rel="preload" href="images/hero-team.svg" as="image" />
+  <link rel="preload" href="images/hero-roadmap.svg" as="image" />
+  <link rel="preload" href="images/hero-field.svg" as="image" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "NEXNGO",
+      "url": "https://maiwandrohani-eng.github.io/nexngo/",
+      "logo": "https://maiwandrohani-eng.github.io/nexngo/NEXNGO.png",
+      "email": "nex4ngo@gmail.com",
+      "sameAs": [
+        "https://instagram.com/nexngo",
+        "https://linkedin.com/company/nexngo",
+        "https://facebook.com/nexngo",
+        "https://x.com/nexngo",
+        "https://youtube.com/@nexngo"
+      ]
+    }
+  </script>
   <style>
+    :root {
+      --bg-main: #06141E;
+      --text-main: #E7EDF5;
+      --accent-primary: #2ec4b6;
+      --accent-secondary: #18d0e2;
+      --panel-deep: rgba(6, 20, 35, 0.80);
+    }
+
     body { font-family: 'Inter', sans-serif; margin: 0; background: #06141E; color: #E7EDF5; }
+    *:focus-visible { outline: 2px solid rgba(46,196,182,0.92); outline-offset: 2px; }
     .page-fade { transition: opacity 0.35s ease-in-out, transform 0.35s ease-in-out; opacity: 1; transform: translateY(0); }
     .page-hidden { opacity: 0; transform: translateY(12px); pointer-events: none; height: 0; }
     .nav-link { transition: color .25s, background .25s; }
@@ -124,6 +171,15 @@
         transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
         will-change: opacity, transform;
       }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen bg-[#041223] text-slate-100">
@@ -153,6 +209,56 @@
       const [heroSlideVisible, setHeroSlideVisible] = useState(true);
       const heroTransitionTimer = useRef(null);
       const [contactStatus, setContactStatus] = useState(null);
+
+      const ANALYTICS_CONFIG = {
+        gaMeasurementId: '',
+        endpoint: ''
+      };
+
+      const FORM_CONFIG = {
+        endpoint: '',
+        accessKey: ''
+      };
+
+      const trackEvent = (eventName, payload = {}) => {
+        const eventPayload = {
+          ...payload,
+          locale,
+          page,
+          timestamp: new Date().toISOString()
+        };
+
+        if (window.gtag) {
+          window.gtag('event', eventName, eventPayload);
+        }
+
+        if (ANALYTICS_CONFIG.endpoint) {
+          const eventBody = JSON.stringify({ event: eventName, ...eventPayload });
+          if (navigator.sendBeacon) {
+            const blob = new Blob([eventBody], { type: 'application/json' });
+            navigator.sendBeacon(ANALYTICS_CONFIG.endpoint, blob);
+          } else {
+            fetch(ANALYTICS_CONFIG.endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: eventBody
+            }).catch(() => {});
+          }
+        }
+      };
+
+      useEffect(() => {
+        if (!ANALYTICS_CONFIG.gaMeasurementId || window.gtag) return;
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.gaMeasurementId}`;
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){ window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', ANALYTICS_CONFIG.gaMeasurementId);
+      }, []);
 
       const socialLinks = [
         { id: 'instagram', label: 'Instagram', handle: '@nexngo', href: 'https://instagram.com/nexngo', icon: 'instagram' },
@@ -200,7 +306,7 @@
         );
       };
 
-      const handleContactSubmit = (e) => {
+      const handleContactSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const name = (formData.get('name') || '').toString().trim();
@@ -243,9 +349,49 @@
               inquiry
             ];
 
+        trackEvent('contact_form_submit', { orgType: orgType || 'unknown' });
+
+        if (FORM_CONFIG.endpoint) {
+          const payload = {
+            access_key: FORM_CONFIG.accessKey,
+            name,
+            email,
+            organization: org,
+            role,
+            organization_type: orgType,
+            inquiry,
+            privacy,
+            source: 'nexngo-website'
+          };
+
+          try {
+            const response = await fetch(FORM_CONFIG.endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              throw new Error('Form endpoint error');
+            }
+
+            setContactStatus('sent');
+            trackEvent('contact_form_sent');
+            setTimeout(() => setContactStatus(null), 5000);
+            e.currentTarget.reset();
+            return;
+          } catch (error) {
+            setContactStatus('error');
+            trackEvent('contact_form_error', { message: error.message });
+            setTimeout(() => setContactStatus(null), 6000);
+            return;
+          }
+        }
+
         const mailtoLink = `mailto:nex4ngo@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
         window.location.href = mailtoLink;
         setContactStatus('draft');
+        trackEvent('contact_form_draft_opened');
         setTimeout(() => setContactStatus(null), 5000);
         e.currentTarget.reset();
       };
@@ -716,6 +862,39 @@
 
       const c = copy[locale];
 
+      useEffect(() => {
+        const pageTitleMap = {
+          home: locale === 'en' ? 'NEXNGO | Donor-Ready NGO Systems' : 'NEXNGO | Bagisciya Hazir STK Sistemleri',
+          about: locale === 'en' ? 'About NEXNGO | Strategy and Systems Advisory' : 'NEXNGO Hakkinda | Strateji ve Sistem Danismanligi',
+          solutions: locale === 'en' ? 'Solutions | NEXNGO Operating System' : 'Cozumler | NEXNGO Isletim Sistemi',
+          nonprofits: locale === 'en' ? 'Nonprofit Solutions | NEXNGO' : 'STK Cozumleri | NEXNGO',
+          businesses: locale === 'en' ? 'Business Solutions | NEXNGO' : 'Isletme Cozumleri | NEXNGO',
+          packages: locale === 'en' ? 'Packages | NEXNGO' : 'Paketler | NEXNGO',
+          addons: locale === 'en' ? 'Add-On Services | NEXNGO' : 'Ek Hizmetler | NEXNGO',
+          approach: locale === 'en' ? 'Approach | NEXNGO Methodology' : 'Yaklasim | NEXNGO Metodolojisi',
+          insights: locale === 'en' ? 'Insights | NEXNGO' : 'Icgoruler | NEXNGO',
+          contact: locale === 'en' ? 'Contact | NEXNGO' : 'Iletisim | NEXNGO'
+        };
+
+        const pageDescriptionMap = {
+          home: locale === 'en' ? 'Build donor-ready NGO systems with practical strategy, policy, and procedure support.' : 'Pratik strateji, politika ve prosedur destegiyle bagisciya hazir STK sistemleri kurun.',
+          solutions: locale === 'en' ? 'Explore a 14-module operating system for governance, compliance, finance, and delivery.' : 'Yonetisim, uyum, finans ve teslimat icin 14 modullu isletim sistemini kesfedin.',
+          packages: locale === 'en' ? 'Compare ready-made solution packages and choose the right path for your organization.' : 'Hazir cozum paketlerini karsilastirin ve kurulusunuz icin dogru yolu secin.',
+          contact: locale === 'en' ? 'Book a readiness call with NEXNGO and discuss your organizational priorities.' : 'NEXNGO ile hazirlik gorusmesi planlayin ve kurumsal onceliklerinizi gorusun.'
+        };
+
+        document.documentElement.lang = locale;
+        document.title = pageTitleMap[page] || pageTitleMap.home;
+        const descriptionTag = document.querySelector('meta[name="description"]');
+        if (descriptionTag) {
+          descriptionTag.setAttribute('content', pageDescriptionMap[page] || pageDescriptionMap.home);
+        }
+      }, [page, locale]);
+
+      useEffect(() => {
+        trackEvent('page_view', { view: page });
+      }, [page, locale]);
+
       const heroSlides = locale === 'en'
         ? [
           {
@@ -880,6 +1059,12 @@
         { id: 'insights', label: c.nav[5] },
         { id: 'contact', label: c.nav[6] }
       ];
+
+      const toggleLocale = () => {
+        const nextLocale = locale === 'en' ? 'tr' : 'en';
+        setLocale(nextLocale);
+        trackEvent('locale_toggled', { to: nextLocale });
+      };
 
       const solutionsSubItems = [
         { id: 'nonprofits', label: c.nav[2] },
@@ -1176,9 +1361,19 @@
                       )
                     ),
                     React.createElement('button', { type:'submit', className:'w-full rounded-xl bg-gradient-to-r from-teal-400 to-cyan-400 text-navy px-6 py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-[1.01] transition' }, c.cta),
-                    contactStatus === 'draft' && React.createElement('div', { className: 'rounded-lg border border-green-400/30 bg-green-950/30 p-4 text-green-100' },
+                    React.createElement('div', { 'aria-live': 'polite', className: 'space-y-3' },
+                      contactStatus === 'sent' && React.createElement('div', { className: 'rounded-lg border border-green-400/30 bg-green-950/30 p-4 text-green-100' },
+                        React.createElement('strong', null, locale==='en' ? '✓ Message Sent' : '✓ Mesaj Gonderildi'),
+                        React.createElement('p', { className: 'mt-1 text-sm' }, locale==='en' ? 'Your inquiry was sent successfully. We will contact you soon.' : 'Basvurunuz basariyla gonderildi. Kisa surede sizinle iletisime gececegiz.')
+                      ),
+                      contactStatus === 'error' && React.createElement('div', { className: 'rounded-lg border border-red-400/30 bg-red-950/30 p-4 text-red-100' },
+                        React.createElement('strong', null, locale==='en' ? '⚠ Delivery Failed' : '⚠ Gonderim Basarisiz'),
+                        React.createElement('p', { className: 'mt-1 text-sm' }, locale==='en' ? 'The form endpoint is not configured yet. Please use the email draft option or add your form endpoint in the project config.' : 'Form ucu henuz yapilandirilmamis. Lutfen e-posta taslagi secenegini kullanin veya proje ayarlarina form ucunu ekleyin.')
+                      ),
+                      contactStatus === 'draft' && React.createElement('div', { className: 'rounded-lg border border-green-400/30 bg-green-950/30 p-4 text-green-100' },
                       React.createElement('strong', null, locale==='en' ? '✓ Email Draft Opened' : '✓ E-posta Taslagi Acildi'),
                       React.createElement('p', { className: 'mt-1 text-sm' }, locale==='en' ? 'Your email app should open a prefilled message to nex4ngo@gmail.com. Send it to complete your inquiry.' : 'E-posta uygulamanizda nex4ngo@gmail.com icin doldurulmus bir taslak acilmalidir. Basvurunuzu tamamlamak icin gonderin.')
+                      )
                     )
                   )
                 ),
@@ -1196,6 +1391,7 @@
                           href: social.href,
                           target: '_blank',
                           rel: 'noreferrer noopener',
+                          'aria-label': `${social.label} ${social.handle}`,
                           className: 'flex items-center justify-between rounded-lg border border-cyan-400/20 bg-slate-900/40 px-3 py-2 text-sm text-slate-200 hover:border-cyan-300/50 hover:bg-slate-900/70 transition'
                         },
                           React.createElement('span', { className: 'inline-flex items-center gap-2 text-cyan-200' },
@@ -1295,6 +1491,31 @@
                   );
                 })
               ),
+              React.createElement('div', { className: 'mt-12 rounded-xl border border-cyan-300/30 bg-[#062033]/80 p-6 overflow-x-auto' },
+                React.createElement('h3', { className: 'text-xl font-bold text-cyan-100 mb-2' }, locale==='en' ? 'Quick Package Comparison' : 'Hizli Paket Karsilastirmasi'),
+                React.createElement('p', { className: 'text-slate-300 text-sm mb-4' }, locale==='en' ? 'Use this matrix to quickly find your best-fit package before booking a readiness call.' : 'Hazirlik gorusmesi planlamadan once size en uygun paketi hizlica secmek icin bu matrisi kullanin.'),
+                React.createElement('table', { className: 'w-full min-w-[720px] border-collapse text-sm' },
+                  React.createElement('thead', null,
+                    React.createElement('tr', { className: 'text-left text-cyan-200 border-b border-cyan-400/30' },
+                      React.createElement('th', { className: 'py-2 pr-4 font-semibold' }, locale==='en' ? 'Package' : 'Paket'),
+                      React.createElement('th', { className: 'py-2 pr-4 font-semibold' }, locale==='en' ? 'Best For' : 'En Uygun'),
+                      React.createElement('th', { className: 'py-2 pr-4 font-semibold' }, locale==='en' ? 'Timeline' : 'Sure'),
+                      React.createElement('th', { className: 'py-2 font-semibold' }, locale==='en' ? 'Primary Outcome' : 'Temel Sonuc')
+                    )
+                  ),
+                  React.createElement('tbody', null,
+                    c.solutions.packages.slice(0, 4).map((pkg) => {
+                      const detail = packageDetails[locale][pkg.id];
+                      return React.createElement('tr', { key: `matrix-${pkg.id}`, className: 'border-b border-slate-700/40 text-slate-200' },
+                        React.createElement('td', { className: 'py-3 pr-4 font-semibold text-cyan-100' }, pkg.name),
+                        React.createElement('td', { className: 'py-3 pr-4' }, pkg.ideal),
+                        React.createElement('td', { className: 'py-3 pr-4 whitespace-nowrap text-teal-200' }, pkg.time),
+                        React.createElement('td', { className: 'py-3' }, detail.outcomes[0])
+                      );
+                    })
+                  )
+                )
+              ),
               React.createElement('div', { className: 'mt-16' },
                 React.createElement('div', { className: 'rounded-xl border border-cyan-300/30 bg-[#062033]/80 p-8 text-center' },
                   React.createElement('h3', { className: 'text-2xl font-bold text-cyan-100 mb-3' }, locale==='en' ? 'Optional Add-On Services' : 'İsteğe Bağlı Ek Hizmetler'),
@@ -1391,7 +1612,10 @@
                     heroSlides.map((_, idx) => React.createElement('button', {
                       key: `dot-${idx}`,
                       type: 'button',
-                      onClick: ()=>queueHeroSlide(idx),
+                      onClick: ()=>{
+                        queueHeroSlide(idx);
+                        trackEvent('hero_slide_select', { slideIndex: idx + 1 });
+                      },
                       className: `h-2.5 rounded-full transition-all ${heroSlide===idx ? 'w-7 bg-cyan-300' : 'w-2.5 bg-cyan-700/70 hover:bg-cyan-500/80'}`,
                       'aria-label': locale==='en' ? `Go to slide ${idx + 1}` : `${idx + 1}. slayta git`
                     }))
@@ -1508,6 +1732,52 @@
                     ).map((line, idx) => React.createElement('li', { key:idx }, line))
                   ),
                   React.createElement('p', { className:'text-slate-300 text-sm mt-3' }, locale==='en' ? 'Not ideal if you only want a one-off document set without implementation ownership.' : 'Yalnizca tek seferlik belge seti istiyor ve uygulama sahipligi istemiyorsaniz ideal olmayabilir.')
+                ),
+                React.createElement('div', { className:'mt-8 rounded-xl border border-cyan-400/20 bg-[#041A2A]/80 p-5' },
+                  React.createElement('h4', { className:'text-cyan-100 font-semibold mb-4' }, locale==='en' ? 'Proof and Partner Signals' : 'Kanit ve Is Ortagi Sinyalleri'),
+                  React.createElement('div', { className:'grid gap-3 md:grid-cols-3 mb-4' },
+                    (locale==='en'
+                      ? [
+                          { quote: 'Our donor reporting cycle became structured and predictable within one quarter.', role: 'Programs Director, Regional NGO' },
+                          { quote: 'Board and finance conversations are now based on one shared control view.', role: 'Executive Lead, Education Foundation' },
+                          { quote: 'We moved from reactive audit prep to ongoing compliance readiness.', role: 'Operations Manager, Health NGO' }
+                        ]
+                      : [
+                          { quote: 'Bagisci raporlama dongumuz bir ceyrek icinde daha yapili ve ongorulebilir hale geldi.', role: 'Program Direktoru, Bolgesel STK' },
+                          { quote: 'Yonetim kurulu ve finans gorusmeleri artik tek bir ortak kontrol gorunumu uzerinden ilerliyor.', role: 'Yonetici Lider, Egitim Vakfi' },
+                          { quote: 'Reaktif denetim hazirligindan surekli uyum hazirligina gectik.', role: 'Operasyon Yoneticisi, Saglik STKsi' }
+                        ]
+                    ).map((item, idx) => React.createElement('div', { key: `proof-${idx}`, className:'rounded-lg border border-cyan-400/20 bg-slate-900/40 p-4' },
+                      React.createElement('p', { className:'text-sm text-slate-200 italic' }, `"${item.quote}"`),
+                      React.createElement('p', { className:'mt-2 text-xs text-cyan-200' }, item.role)
+                    ))
+                  ),
+                  React.createElement('div', { className:'flex flex-wrap gap-2' },
+                    (locale==='en'
+                      ? ['Global NGO Networks', 'Community Foundations', 'Program Implementers', 'Humanitarian Teams']
+                      : ['Kuresel STK Aglari', 'Toplum Vakiflari', 'Program Uygulayici Kurumlar', 'Insani Yardim Ekipleri']
+                    ).map((label, idx) => React.createElement('span', { key: `logo-${idx}`, className:'inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-900/20 px-3 py-1 text-xs text-cyan-100' }, label))
+                  )
+                ),
+                React.createElement('div', { className:'mt-8 rounded-xl border border-cyan-400/20 bg-[#041A2A]/80 p-5' },
+                  React.createElement('h4', { className:'text-cyan-100 font-semibold mb-3' }, locale==='en' ? 'Frequently Asked Questions' : 'Sik Sorulan Sorular'),
+                  React.createElement('div', { className:'space-y-3' },
+                    (locale==='en'
+                      ? [
+                          { q: 'Can we start with one module only?', a: 'Yes. We can begin with one high-priority module and scale in phases based on your readiness and budget.' },
+                          { q: 'How much time is required from our team?', a: 'Most teams allocate 2-4 focused hours per week during core setup, with clear milestones and ownership.' },
+                          { q: 'Do you support policy and procedure writing?', a: 'Yes. Policy, SOP, and governance documentation support is included as part of delivery.' }
+                        ]
+                      : [
+                          { q: 'Sadece tek bir modulle baslayabilir miyiz?', a: 'Evet. Once yuksek oncelikli bir modulle baslayip hazirlik ve butceye gore asamali buyuyebiliriz.' },
+                          { q: 'Ekibimizden ne kadar zaman gerekir?', a: 'Temel kurulumda ekipler genelde haftalik 2-4 saat odakli zaman ayirir; net kilometre taslari ve sahiplik yapisiyla ilerlenir.' },
+                          { q: 'Politika ve prosedur yaziminda destek veriyor musunuz?', a: 'Evet. Politika, SOP ve yonetisim dokumantasyonu destegi teslimatin bir parcasidir.' }
+                        ]
+                    ).map((item, idx) => React.createElement('details', { key: `faq-${idx}`, className:'rounded-lg border border-cyan-400/20 bg-slate-900/40 p-3' },
+                      React.createElement('summary', { className:'cursor-pointer font-semibold text-cyan-100' }, item.q),
+                      React.createElement('p', { className:'mt-2 text-sm text-slate-300' }, item.a)
+                    ))
+                  )
                 )
               )
             );
@@ -1516,6 +1786,7 @@
 
       const onNavigate = (id) => {
         if (!['home','about','solutions','nonprofits','businesses','approach','insights','contact','packages','addons'].includes(id)) return;
+        trackEvent('page_navigate', { to: id });
         setPage(id);
         setSelectedNonprofit(null);
         setSelectedBusiness(null);
@@ -1547,7 +1818,8 @@
                 return React.createElement('div', { key: item.id, className: 'dropdown-trigger relative' },
                   React.createElement('button', {
                     className: `nav-link rounded-lg px-3 py-2 text-sm ${page===item.id ? 'nav-link-active text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`,
-                    onClick: ()=>onNavigate(item.id)
+                    onClick: ()=>onNavigate(item.id),
+                    'aria-current': page===item.id ? 'page' : undefined
                   }, item.label),
                   React.createElement('div', { className: 'dropdown-menu' },
                     solutionsSubItems.map(sub => React.createElement('button', {
@@ -1561,14 +1833,15 @@
               return React.createElement('button', {
                 key: item.id,
                 className: `nav-link rounded-lg px-3 py-2 text-sm ${page===item.id ? 'nav-link-active text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`,
-                onClick: ()=>onNavigate(item.id)
+                onClick: ()=>onNavigate(item.id),
+                'aria-current': page===item.id ? 'page' : undefined
               }, item.label);
             }),
-            React.createElement('button', { onClick: ()=>setLocale(locale==='en'?'tr':'en'), className:'rounded-lg border border-cyan-400/50 px-3 py-2 text-xs text-cyan-100 hover:bg-slate-800/50' }, locale==='en'?'TR':'EN'),
+            React.createElement('button', { onClick: toggleLocale, className:'rounded-lg border border-cyan-400/50 px-3 py-2 text-xs text-cyan-100 hover:bg-slate-800/50', 'aria-pressed': locale!=='en' }, locale==='en'?'TR':'EN'),
             React.createElement('a', { href:'mailto:nex4ngo@gmail.com', className:'rounded-lg bg-amber-400 px-4 py-2 font-semibold text-navy hover:bg-amber-300' }, c.cta)
           ),
           React.createElement('div', { className:'md:hidden flex items-center gap-2' },
-            React.createElement('button', { onClick: ()=>setLocale(locale==='en'?'tr':'en'), className:'rounded-lg border border-cyan-400/50 px-2 py-1 text-xs text-cyan-100' }, locale==='en'?'TR':'EN'),
+            React.createElement('button', { onClick: toggleLocale, className:'rounded-lg border border-cyan-400/50 px-2 py-1 text-xs text-cyan-100', 'aria-pressed': locale!=='en' }, locale==='en'?'TR':'EN'),
             React.createElement('button', { onClick: ()=>onNavigate('contact'), className:'rounded-lg bg-amber-400 px-3 py-2 text-xs font-semibold text-navy' }, c.cta)
           )
         ),
@@ -1580,6 +1853,7 @@
               href: social.href,
               target: '_blank',
               rel: 'noreferrer noopener',
+              'aria-label': `${social.label} ${social.handle}`,
               className: 'inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-slate-900/50 px-3 py-1.5 text-cyan-200 hover:border-cyan-300 hover:text-cyan-100 transition'
             },
               renderSocialIcon(social.icon),
