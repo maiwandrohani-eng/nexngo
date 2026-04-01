@@ -120,6 +120,11 @@
     .motion-underline { position: relative; display: inline-block; }
     .motion-underline::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: linear-gradient(90deg, #23fee6, #0ff0e5); transition: width .25s ease; }
     .motion-underline:hover::after { width: 100%; }
+    .hero-slide { animation: heroSlideIn .45s ease; }
+    @keyframes heroSlideIn {
+      from { opacity: 0; transform: translateX(16px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
   </style>
 </head>
 <body class="min-h-screen bg-[#041223] text-slate-100">
@@ -144,6 +149,8 @@
       const [selectedSolutionModule, setSelectedSolutionModule] = useState(null);
       const [selectedInsight, setSelectedInsight] = useState(null);
       const [selectedPackage, setSelectedPackage] = useState(null);
+      const [heroSlide, setHeroSlide] = useState(0);
+      const [heroPaused, setHeroPaused] = useState(false);
       const [contactStatus, setContactStatus] = useState(null);
 
       const socialLinks = [
@@ -658,6 +665,86 @@
 
       const c = copy[locale];
 
+      const heroSlides = locale === 'en'
+        ? [
+          {
+            title: c.heroTitle,
+            sub: c.heroSub,
+            chips: ['14 operating modules', '8-12 week core setup', 'Packages for each maturity stage'],
+            primaryLabel: c.nav[2],
+            primaryPage: 'nonprofits',
+            secondaryLabel: c.nav[3],
+            secondaryPage: 'businesses',
+            note: 'No long-term lock-in. We work in phased milestones with clear checkpoints.'
+          },
+          {
+            title: 'One Connected System, Not Isolated Fixes',
+            sub: 'Our 14 modules align governance, finance, compliance, and delivery so teams can run stronger operations with clearer accountability.',
+            chips: ['Governance to reporting continuity', 'Practical controls and routines', 'Built for donor confidence'],
+            primaryLabel: 'Explore Solutions',
+            primaryPage: 'solutions',
+            secondaryLabel: 'View Packages',
+            secondaryPage: 'packages',
+            note: 'Choose a package based on your current maturity stage and delivery pressure.'
+          },
+          {
+            title: 'From Assessment to Implementation in 4 Stages',
+            sub: 'We assess, design, implement, and strengthen your operating model with strategy, policy, and procedure support built into delivery.',
+            chips: ['Assessment', 'Design', 'Implementation', 'Strengthen'],
+            primaryLabel: 'See Our Approach',
+            primaryPage: 'approach',
+            secondaryLabel: c.cta,
+            secondaryPage: 'contact',
+            note: 'Every stage has clear outputs, ownership, and measurable progress checkpoints.'
+          }
+        ]
+        : [
+          {
+            title: c.heroTitle,
+            sub: c.heroSub,
+            chips: ['14 operasyon modulu', '8-12 haftada cekirdek kurulum', 'Her olgunluk seviyesi icin paketler'],
+            primaryLabel: c.nav[2],
+            primaryPage: 'nonprofits',
+            secondaryLabel: c.nav[3],
+            secondaryPage: 'businesses',
+            note: 'Uzun donemli baglilik zorunlu degil. Net kontrol noktalarina sahip asamali kilometre taslariyla ilerliyoruz.'
+          },
+          {
+            title: 'Parcali Cozumler Yerine Birbirine Bagli Tek Sistem',
+            sub: '14 modul, yonetisim, finans, uyum ve teslimati tek bir isletim modelinde birlestirerek ekiplerin daha net sorumlulukla calismasini saglar.',
+            chips: ['Yonetisimden raporlamaya sureklilik', 'Pratik kontrol ve rutinler', 'Bagisci guvenine uygun yapi'],
+            primaryLabel: 'Cozumleri Inceleyin',
+            primaryPage: 'solutions',
+            secondaryLabel: 'Paketleri Gorun',
+            secondaryPage: 'packages',
+            note: 'Kurulusunuzun mevcut olgunluk seviyesine ve operasyon baskisina gore en uygun paketi secin.'
+          },
+          {
+            title: '4 Asamada Degerlendirmeden Uygulamaya',
+            sub: 'Degerlendir, tasarla, uygula ve guclendir asamalariyla; strateji, politika ve prosedur destegini teslimatin ayrilmaz parcasi olarak sunuyoruz.',
+            chips: ['Degerlendir', 'Tasarla', 'Uygula', 'Guclendir'],
+            primaryLabel: 'Yaklasimi Inceleyin',
+            primaryPage: 'approach',
+            secondaryLabel: c.cta,
+            secondaryPage: 'contact',
+            note: 'Her asamada net ciktilar, sahiplik ve olculebilir ilerleme kontrol noktalari bulunur.'
+          }
+        ];
+
+      useEffect(() => {
+        setHeroSlide(0);
+      }, [locale]);
+
+      useEffect(() => {
+        if (page !== 'home' || heroPaused) return;
+        const timer = setInterval(() => {
+          setHeroSlide((prev) => (prev + 1) % heroSlides.length);
+        }, 3000);
+        return () => clearInterval(timer);
+      }, [page, heroPaused, heroSlides.length]);
+
+      const activeHeroSlide = heroSlides[heroSlide] || heroSlides[0];
+
       const navItems = [
         { id: 'home', label: locale==='en' ? 'Home' : 'Ana Sayfa' },
         { id: 'about', label: c.nav[0] },
@@ -1143,20 +1230,32 @@
                 Array.from({ length: 30 }, (_, i) => React.createElement('span', { key:i, className:'hero-particle', style: { left:`${(i*7)%96}%`, top:`${20+(i*3)%60}%`, '--p-time': `${5+Math.random()*8}s` } }))
               ),
               React.createElement('div', { className:'layered relative z-10 flex flex-col gap-8' },
-                React.createElement('div', { className:'home-panel p-8 rounded-3xl border border-cyan-300/30 shadow-2xl' },
-                  React.createElement('h1', { className:'text-3xl md:text-5xl font-bold text-white leading-tight mb-4 max-w-4xl' }, c.heroTitle),
-                  React.createElement('p', { className:'text-slate-200 text-base md:text-lg mb-6 max-w-3xl' }, c.heroSub),
-                  React.createElement('div', { className:'mb-6 flex flex-wrap gap-2' },
-                    (locale==='en'
-                      ? ['14 operating modules', '8-12 week core setup', 'Packages for each maturity stage']
-                      : ['14 operasyon modulu', '8-12 haftada cekirdek kurulum', 'Her olgunluk seviyesi icin paketler']
-                    ).map((item, idx) => React.createElement('span', { key:idx, className:'inline-flex items-center rounded-full border border-cyan-400/35 bg-cyan-900/25 px-3 py-1 text-xs text-cyan-100' }, item))
+                React.createElement('div', {
+                  className:'home-panel p-8 rounded-3xl border border-cyan-300/30 shadow-2xl',
+                  onMouseEnter: ()=>setHeroPaused(true),
+                  onMouseLeave: ()=>setHeroPaused(false)
+                },
+                  React.createElement('div', { key:`hero-${locale}-${heroSlide}`, className:'hero-slide' },
+                    React.createElement('h1', { className:'text-3xl md:text-5xl font-bold text-white leading-tight mb-4 max-w-4xl' }, activeHeroSlide.title),
+                    React.createElement('p', { className:'text-slate-200 text-base md:text-lg mb-6 max-w-3xl' }, activeHeroSlide.sub),
+                    React.createElement('div', { className:'mb-6 flex flex-wrap gap-2' },
+                      activeHeroSlide.chips.map((item, idx) => React.createElement('span', { key:idx, className:'inline-flex items-center rounded-full border border-cyan-400/35 bg-cyan-900/25 px-3 py-1 text-xs text-cyan-100' }, item))
+                    ),
+                    React.createElement('div', { className:'flex flex-wrap gap-3' },
+                      React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.primaryPage), className:'rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 text-navy px-6 py-3 font-semibold text-sm shadow-lg hover:scale-[1.02] transition-transform' }, activeHeroSlide.primaryLabel),
+                      React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.secondaryPage), className:'rounded-xl border border-cyan-400 px-6 py-3 text-cyan-100 text-sm hover:bg-slate-800 transition' }, activeHeroSlide.secondaryLabel)
+                    ),
+                    React.createElement('p', { className:'mt-4 text-sm text-slate-300' }, activeHeroSlide.note)
                   ),
-                  React.createElement('div', { className:'flex flex-wrap gap-3' },
-                    React.createElement('button', { onClick: ()=>setPage('nonprofits'), className:'rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 text-navy px-6 py-3 font-semibold text-sm shadow-lg hover:scale-[1.02] transition-transform' }, c.nav[2]),
-                    React.createElement('button', { onClick: ()=>setPage('businesses'), className:'rounded-xl border border-cyan-400 px-6 py-3 text-cyan-100 text-sm hover:bg-slate-800 transition' }, c.nav[3])
-                  ),
-                  React.createElement('p', { className:'mt-4 text-sm text-slate-300' }, locale==='en' ? 'No long-term lock-in. We work in phased milestones with clear checkpoints.' : 'Uzun donemli baglilik zorunlu degil. Net kontrol noktalarina sahip asamali kilometre taslariyla ilerliyoruz.')
+                  React.createElement('div', { className:'mt-5 flex items-center gap-2' },
+                    heroSlides.map((_, idx) => React.createElement('button', {
+                      key: `dot-${idx}`,
+                      type: 'button',
+                      onClick: ()=>setHeroSlide(idx),
+                      className: `h-2.5 rounded-full transition-all ${heroSlide===idx ? 'w-7 bg-cyan-300' : 'w-2.5 bg-cyan-700/70 hover:bg-cyan-500/80'}`,
+                      'aria-label': locale==='en' ? `Go to slide ${idx + 1}` : `${idx + 1}. slayta git`
+                    }))
+                  )
                 ),
                 React.createElement('div', { className:'mb-2 px-1' },
                   React.createElement('h2', { className:'text-2xl md:text-3xl font-bold text-white mb-2' }, locale==='en' ? 'Your Core Operating System' : 'Temel Isletim Sisteminiz'),
