@@ -213,11 +213,53 @@
   <script>
     const { useState, useEffect, useRef } = React;
 
+    const SITE_CONTENT_STORAGE_KEY = 'nexngo:siteContent:v1';
+
+    function safeJsonParse(value) {
+      if (!value || typeof value !== 'string') return null;
+      try { return JSON.parse(value); } catch { return null; }
+    }
+
+    function loadSiteContentOverride() {
+      try { return safeJsonParse(window.localStorage.getItem(SITE_CONTENT_STORAGE_KEY)); }
+      catch { return null; }
+    }
+
+    function persistSiteContentOverride(content) {
+      window.localStorage.setItem(SITE_CONTENT_STORAGE_KEY, JSON.stringify(content));
+    }
+
+    function clearSiteContentOverride() {
+      window.localStorage.removeItem(SITE_CONTENT_STORAGE_KEY);
+    }
+
+    function downloadJson(filename, obj) {
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 250);
+    }
+
     function App() {
       const initialPage = window.location.hash ? window.location.hash.replace('#','') : 'home';
       const validPages = ['home','about','solutions','nonprofits','businesses','approach','insights','contact','packages','addons'];
       const [page, setPage] = useState(validPages.includes(initialPage) ? initialPage : 'home');
       const [locale, setLocale] = useState('en');
+      const ADMIN_UNLOCK_KEY = 'nexngo:adminUnlocked:v1';
+      const ADMIN_PASSWORD_SHA256 = '1e9149e2d10ee268f6f5d952a565342c5308ac6a9b1933630b6c23d88696501a';
+      const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => {
+        try { return window.sessionStorage.getItem(ADMIN_UNLOCK_KEY) === '1'; } catch { return false; }
+      });
+      const isAdmin = isAdminUnlocked || new URLSearchParams(window.location.search).get('admin') === '1';
+      const [adminOpen, setAdminOpen] = useState(false);
+      const [adminJsonDraft, setAdminJsonDraft] = useState('');
+      const [adminError, setAdminError] = useState(null);
+      const siteContentOverride = loadSiteContentOverride() || window.__SITE_CONTENT_REMOTE__ || null;
       const [hoverNode, setHoverNode] = useState(null);
       const [activeService, setActiveService] = useState(null);
       const [selectedNonprofit, setSelectedNonprofit] = useState(null);
@@ -233,6 +275,51 @@
       const mobileCtaLabel = locale === 'en' ? 'Call' : 'Görüşme';
       const heroTransitionTimer = useRef(null);
       const [contactStatus, setContactStatus] = useState(null);
+
+      const sha256Hex = async (input) => {
+        const bytes = new TextEncoder().encode(input);
+        const buf = await crypto.subtle.digest('SHA-256', bytes);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      };
+
+      const ensureAdminUnlocked = async () => {
+        if (isAdminUnlocked) return true;
+        const entered = window.prompt(locale === 'en' ? 'Enter admin password' : 'Yönetici şifresini girin');
+        if (!entered) return false;
+        try {
+          const digest = await sha256Hex(entered);
+          if (digest !== ADMIN_PASSWORD_SHA256) return false;
+          try { window.sessionStorage.setItem(ADMIN_UNLOCK_KEY, '1'); } catch {}
+          setIsAdminUnlocked(true);
+          return true;
+        } catch {
+          return false;
+        }
+      };
+
+      const openAdminEditor = async () => {
+        setAdminError(null);
+        const ok = await ensureAdminUnlocked();
+        if (!ok) {
+          setAdminError(locale === 'en' ? 'Wrong password.' : 'Şifre yanlış.');
+          return;
+        }
+        const snapshot = siteContentOverride || {
+          copy,
+          socialLinks,
+          nonprofitScenarios,
+          businessScenarios,
+          solutionModuleDetails,
+          packageDetails,
+          insightsItems,
+          lines,
+          nodeDataByLocale: { [locale]: nodeData },
+          serviceItemsByLocale: { [locale]: serviceItems },
+          heroSlidesByLocale: { [locale]: heroSlides }
+        };
+        setAdminJsonDraft(JSON.stringify(snapshot, null, 2));
+        setAdminOpen(true);
+      };
 
       const ANALYTICS_CONFIG = {
         gaMeasurementId: '',
@@ -284,13 +371,16 @@
         window.gtag('config', ANALYTICS_CONFIG.gaMeasurementId);
       }, []);
 
-      const socialLinks = [
+      let socialLinks = [
         { id: 'instagram', label: 'Instagram', handle: '@nexngo', href: 'https://instagram.com/nexngo', icon: 'instagram' },
         { id: 'linkedin', label: 'LinkedIn', handle: 'nexngo', href: 'https://linkedin.com/company/nexngo', icon: 'linkedin' },
         { id: 'facebook', label: 'Facebook', handle: 'nexngo', href: 'https://facebook.com/nexngo', icon: 'facebook' },
         { id: 'x', label: 'X', handle: '@nexngo', href: 'https://x.com/nexngo', icon: 'x' },
         { id: 'youtube', label: 'YouTube', handle: '@nexngo', href: 'https://youtube.com/@nexngo', icon: 'youtube' }
       ];
+      if (siteContentOverride && Array.isArray(siteContentOverride.socialLinks)) {
+        socialLinks = siteContentOverride.socialLinks;
+      }
 
       const renderSocialIcon = (icon) => {
         const base = { className: 'h-4 w-4', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' };
@@ -420,7 +510,7 @@
         e.currentTarget.reset();
       };
 
-      const nonprofitScenarios = [
+      let nonprofitScenarios = [
         {
           id: 'grant-compliance',
           title: 'Grant Compliance & Audit Readiness',
@@ -449,8 +539,11 @@
           detailTr: 'Fon bulma rekabeti her zamankinden daha yoğun; bağışçı gereksinimleri ise daha sıkı. Bu yol, Modül 1, 2 ve 3\'ü kapsar; daha akıllı bir hibe hattı kurmanıza, teklifleri bağışçı öncelikleriyle hizalamanıza ve erken güven oluşturan bir yönetişim yapısı kurmanıza yardımcı olur. Tipik sonuçlar: finansman hattınızda daha nitelikli fırsatlar, daha güçlü teklifler ve kısa listeden ödüle daha hızlı ilerleme.'
         }
       ];
+      if (siteContentOverride && Array.isArray(siteContentOverride.nonprofitScenarios)) {
+        nonprofitScenarios = siteContentOverride.nonprofitScenarios;
+      }
 
-      const businessScenarios = [
+      let businessScenarios = [
         {
           id: 'integrated-finance',
           title: 'Financial Visibility & Planning Discipline',
@@ -479,8 +572,11 @@
           detailTr: 'Farklı ekipler farklı rakamlar raporladığında ve metriklerin ortak bir tanımı olmadığında liderliğin veriye güveni azalır. Bu yol, ortak bir KPI çerçevesi, daha temiz veri akışları ve yalnızca kurul sunumlarında değil, gerçek kararlarda da işe yarayan bir raporlama yapısı kurar. Tipik sonuçlar: mutabakata daha az zaman harcanması, daha hızlı içgörü döngüleri ve liderliğin güvendiği raporlar.'
         }
       ];
+      if (siteContentOverride && Array.isArray(siteContentOverride.businessScenarios)) {
+        businessScenarios = siteContentOverride.businessScenarios;
+      }
 
-      const solutionModuleDetails = {
+      let solutionModuleDetails = {
         en: {
           1: { summary: 'Establishes the executive control layer that aligns strategy, policies, and risk ownership across the organization.', focus: ['Board and committee decision rights', 'Risk appetite and escalation thresholds', 'Governance calendar with review cadences'] },
           2: { summary: 'Builds a repeatable funding engine that prioritizes qualified opportunities and strengthens proposal readiness.', focus: ['Funding pipeline scoring model', 'Donor fit and compliance filters', 'Submission workflow and review checkpoints'] },
@@ -514,8 +610,11 @@
           14: { summary: 'Karmaşık ortamlarda çalışan dağınık ekipler için dayanıklı saha ve uzaktan çalışma pratikleri tasarlar.', focus: ['Uzaktan koordinasyon rutinleri', 'Görev bakım ve saha güvenliği kontrolleri', 'Çevrimdışı-çevrimiçi raporlama sürekliliği'] }
         }
       };
+      if (siteContentOverride && siteContentOverride.solutionModuleDetails && typeof siteContentOverride.solutionModuleDetails === 'object') {
+        solutionModuleDetails = siteContentOverride.solutionModuleDetails;
+      }
 
-      const packageDetails = {
+      let packageDetails = {
         en: {
           1: { summary: 'A rapid compliance foundation for NGOs that need core governance, donor obligation tracking, and legal readiness before scaling.', outcomes: ['Board-level governance baseline', 'Donor compliance calendar in place', 'Core statutory controls documented'] },
           2: { summary: 'A growth package that strengthens donor readiness by connecting strategy, grant targeting, compliance discipline, and financial visibility.', outcomes: ['Qualified funding pipeline visibility', 'Stronger proposal-to-award alignment', 'Financial narrative ready for donors'] },
@@ -537,8 +636,11 @@
           8: { summary: 'Uzaktan ve saha ağırlıklı operasyonlar için gerekli insan, güvenlik ve teslimat iş akışlarıyla dağıtık ekipleri destekler.', outcomes: ['Uzaktan iş birliği yapısının kurulması', 'Saha raporlama sürekliliğinde iyileşme', 'Dijital operasyon kontrollerinin güçlenmesi'] }
         }
       };
+      if (siteContentOverride && siteContentOverride.packageDetails && typeof siteContentOverride.packageDetails === 'object') {
+        packageDetails = siteContentOverride.packageDetails;
+      }
 
-      const insightsItems = [
+      let insightsItems = [
         {
           id: 'enterprise-opacity',
           title: 'See What Is Slowing Delivery Before It Becomes a Donor Problem',
@@ -573,8 +675,11 @@
           detailsTr: 'Güçlü raporlama sadece daha fazla veri toplamak değildir. Her metriği anlaşılır, izlenebilir ve kararlar için kullanılabilir hale getirmektir. Bu içgörü, yapılandırılmış bir KPI çerçevesinin raporlama anlaşmazlıklarını nasıl azalttığını, bağışçı güvenini nasıl artırdığını ve iç ekiplerin aynı performans dilini konuşmasını nasıl sağladığını açıklar. Aynı anda hem etkiyi hem uyumu kanıtlama baskısı altındaki kurumlar için bu ciddi bir operasyonel avantaj yaratır.'
         }
       ];
+      if (siteContentOverride && Array.isArray(siteContentOverride.insightsItems)) {
+        insightsItems = siteContentOverride.insightsItems;
+      }
 
-      const nodeData = [
+      let nodeData = [
         {
           id:'governance',
           label: locale==='en'?'Governance & Risk':'Yönetişim ve Risk',
@@ -626,8 +731,13 @@
             : 'Bağışçı raporlamasının, denetime hazırlığın ve yönetici kararlarının aynı veri gerçeğine dayanması için ortak bir kanıt ve KPI yapısı oluşturur.'
         }
       ];
+      if (siteContentOverride && siteContentOverride.nodeDataByLocale && Array.isArray(siteContentOverride.nodeDataByLocale[locale])) {
+        nodeData = siteContentOverride.nodeDataByLocale[locale];
+      } else if (siteContentOverride && Array.isArray(siteContentOverride.nodeData)) {
+        nodeData = siteContentOverride.nodeData;
+      }
 
-      const lines = [
+      let lines = [
         ['governance','reporting'],
         ['finance','reporting'],
         ['operations','reporting'],
@@ -635,8 +745,11 @@
         ['governance','operations'],
         ['finance','programs']
       ];
+      if (siteContentOverride && Array.isArray(siteContentOverride.lines)) {
+        lines = siteContentOverride.lines;
+      }
 
-      const serviceItems = [
+      let serviceItems = [
         { 
           id:'strategy', 
           label: locale==='en'?'Strategy Operating Model':'Strateji İşletme Modeli', 
@@ -659,6 +772,11 @@
           detail: locale==='en' ? 'Connects: Operations, Programs, Governance' : 'Bağlantılar: Operasyon, Programlar, Yönetişim'
         }
       ];
+      if (siteContentOverride && siteContentOverride.serviceItemsByLocale && Array.isArray(siteContentOverride.serviceItemsByLocale[locale])) {
+        serviceItems = siteContentOverride.serviceItemsByLocale[locale];
+      } else if (siteContentOverride && Array.isArray(siteContentOverride.serviceItems)) {
+        serviceItems = siteContentOverride.serviceItems;
+      }
 
       useEffect(() => {
         const onHash = () => {
@@ -669,7 +787,7 @@
         return () => window.removeEventListener('hashchange', onHash);
       }, []);
 
-      const copy = {
+      let copy = {
         en: {
           nav: ['About', 'Solutions', 'Nonprofits', 'Businesses', 'Approach', 'Insights', 'Contact'],
           cta: 'Book a Readiness Call',
@@ -883,6 +1001,9 @@
           }
         }
       };
+      if (siteContentOverride && siteContentOverride.copy && typeof siteContentOverride.copy === 'object') {
+        copy = siteContentOverride.copy;
+      }
 
       const c = copy[locale];
 
@@ -919,7 +1040,7 @@
         trackEvent('page_view', { view: page });
       }, [page, locale]);
 
-      const heroSlides = locale === 'en'
+      let heroSlides = locale === 'en'
         ? [
           {
             title: c.heroTitle,
@@ -1044,6 +1165,11 @@
             imageAlt: 'Saha ve merkez operasyon bağlantıları'
           }
         ];
+      if (siteContentOverride && siteContentOverride.heroSlidesByLocale && Array.isArray(siteContentOverride.heroSlidesByLocale[locale])) {
+        heroSlides = siteContentOverride.heroSlidesByLocale[locale];
+      } else if (siteContentOverride && Array.isArray(siteContentOverride.heroSlides)) {
+        heroSlides = siteContentOverride.heroSlides;
+      }
 
       const queueHeroSlide = (nextIndex) => {
         if (nextIndex === heroSlide) return;
@@ -1864,10 +1990,20 @@
               }, item.label);
             }),
             React.createElement('button', { onClick: toggleLocale, className:'rounded-lg border border-cyan-400/50 px-3 py-2 text-xs text-cyan-100 hover:bg-slate-800/50', 'aria-pressed': locale!=='en' }, locale==='en'?'TR':'EN'),
+            isAdminUnlocked && React.createElement('button', {
+              type:'button',
+              onClick: openAdminEditor,
+              className:'rounded-lg border border-amber-300/40 px-3 py-2 text-xs text-amber-100 hover:bg-amber-900/20'
+            }, locale==='en' ? 'Edit' : 'Düzenle'),
             React.createElement('a', { href:'mailto:nex4ngo@gmail.com', className:'rounded-lg bg-amber-400 px-4 py-2 font-semibold text-navy hover:bg-amber-300' }, c.cta)
           ),
           React.createElement('div', { className:'md:hidden flex items-center gap-1.5 shrink-0' },
             React.createElement('button', { onClick: toggleLocale, className:'rounded-lg border border-cyan-400/50 px-2 py-2 text-[11px] font-semibold text-cyan-100 min-w-[44px]', 'aria-pressed': locale!=='en' }, locale==='en'?'TR':'EN'),
+            isAdminUnlocked && React.createElement('button', {
+              type:'button',
+              onClick: openAdminEditor,
+              className:'rounded-lg border border-amber-300/40 px-2 py-2 text-[11px] font-semibold text-amber-100 min-w-[56px]'
+            }, locale==='en' ? 'Edit' : 'Düzenle'),
             React.createElement('button', { onClick: ()=>onNavigate('contact'), className:'rounded-lg bg-amber-400 px-2.5 py-2 text-[11px] font-semibold text-navy whitespace-nowrap min-w-[96px]' }, mobileCtaLabel),
             React.createElement('button', {
               onClick: ()=>setMobileMenuOpen(!mobileMenuOpen),
@@ -1915,12 +2051,97 @@
           ),
           React.createElement('p', null, '© 2026 NEXNGO. Premium strategy, systems and execution advisory for non-profit and corporate leaders.'),
           React.createElement('p', null, 'Adapted experience for global compliance, governance and performance operations.')
+        ),
+        isAdmin && React.createElement('button', {
+          type: 'button',
+          onClick: openAdminEditor,
+          className: 'fixed bottom-6 right-6 z-[70] h-12 w-12 rounded-full border border-amber-300/40 bg-[#061a26]/90 text-amber-100 shadow-xl hover:bg-amber-900/20 focus:outline-none focus:ring-2 focus:ring-amber-300/40',
+          'aria-label': locale === 'en' ? 'Open editor' : 'Düzenleyiciyi aç'
+        },
+          React.createElement('svg', { viewBox:'0 0 24 24', className:'mx-auto h-5 w-5', fill:'none', stroke:'currentColor', strokeWidth:'1.8', strokeLinecap:'round', strokeLinejoin:'round', 'aria-hidden':'true' },
+            React.createElement('path', { d:'M20 21a8 8 0 0 0-16 0' }),
+            React.createElement('circle', { cx:'12', cy:'7', r:'4' })
+          )
+        ),
+        isAdmin && adminOpen && React.createElement('div', { className:'fixed inset-0 z-[80] bg-black/70 flex items-start justify-center px-4 py-8' },
+          React.createElement('div', { className:'w-full max-w-5xl rounded-2xl border border-cyan-400/20 bg-[#061a26] shadow-2xl' },
+            React.createElement('div', { className:'flex items-start justify-between gap-4 px-5 py-4 border-b border-slate-800' },
+              React.createElement('div', null,
+                React.createElement('h3', { className:'text-white font-bold text-lg' }, locale==='en' ? 'Admin Editor' : 'Yönetici Düzenleyici'),
+                React.createElement('p', { className:'text-slate-400 text-xs mt-1' }, locale==='en'
+                  ? 'Edit content as JSON. Save persists in this browser (localStorage).'
+                  : 'İçeriği JSON olarak düzenleyin. Kaydetme bu tarayıcıda saklanır (localStorage).'
+                )
+              ),
+              React.createElement('button', {
+                type:'button',
+                onClick: ()=>setAdminOpen(false),
+                className:'rounded-lg border border-slate-700 bg-slate-900/40 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800/60'
+              }, locale==='en' ? 'Close' : 'Kapat')
+            ),
+            React.createElement('div', { className:'px-5 py-4' },
+              adminError && React.createElement('div', { className:'mb-3 rounded-lg border border-red-400/30 bg-red-950/30 p-3 text-sm text-red-100' }, adminError),
+              React.createElement('textarea', {
+                value: adminJsonDraft,
+                onChange: (e)=>setAdminJsonDraft(e.target.value),
+                className:'w-full min-h-[420px] rounded-xl border border-slate-700 bg-[#041223] p-4 font-mono text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400/40',
+                spellCheck: false
+              }),
+              React.createElement('div', { className:'mt-4 flex flex-wrap items-center gap-2' },
+                React.createElement('button', {
+                  type:'button',
+                  className:'rounded-lg bg-cyan-400 px-4 py-2 text-xs font-semibold text-navy hover:bg-cyan-300',
+                  onClick: () => {
+                    setAdminError(null);
+                    const parsed = safeJsonParse(adminJsonDraft);
+                    if (!parsed || typeof parsed !== 'object') {
+                      setAdminError(locale==='en' ? 'Invalid JSON.' : 'Geçersiz JSON.');
+                      return;
+                    }
+                    try { persistSiteContentOverride(parsed); } catch {}
+                    window.location.reload();
+                  }
+                }, locale==='en' ? 'Save & reload' : 'Kaydet ve yenile'),
+                React.createElement('button', {
+                  type:'button',
+                  className:'rounded-lg border border-slate-700 bg-slate-900/40 px-4 py-2 text-xs text-slate-200 hover:bg-slate-800/60',
+                  onClick: () => {
+                    const parsed = safeJsonParse(adminJsonDraft);
+                    downloadJson('siteContent.json', parsed || {});
+                  }
+                }, locale==='en' ? 'Download JSON' : 'JSON indir'),
+                React.createElement('button', {
+                  type:'button',
+                  className:'rounded-lg border border-amber-300/40 bg-amber-900/10 px-4 py-2 text-xs text-amber-100 hover:bg-amber-900/20',
+                  onClick: () => {
+                    clearSiteContentOverride();
+                    window.location.reload();
+                  }
+                }, locale==='en' ? 'Reset to default' : 'Varsayılana dön')
+              )
+            )
+          )
         )
       );
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
+    async function bootstrap() {
+      try {
+        const res = await fetch('./content/siteContent.json', { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json && typeof json === 'object') {
+            // make remote content available to the app without adding bundler deps
+            window.__SITE_CONTENT_REMOTE__ = json;
+          }
+        }
+      } catch (_) {}
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(React.createElement(App));
+    }
+
+    bootstrap();
   </script>
 </body>
 </html>
