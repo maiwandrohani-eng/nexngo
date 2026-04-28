@@ -260,6 +260,7 @@
       const [adminJsonDraft, setAdminJsonDraft] = useState('');
       const [adminError, setAdminError] = useState(null);
       const siteContentOverride = loadSiteContentOverride() || window.__SITE_CONTENT_REMOTE__ || null;
+      const [editMode, setEditMode] = useState(false);
       const [hoverNode, setHoverNode] = useState(null);
       const [activeService, setActiveService] = useState(null);
       const [selectedNonprofit, setSelectedNonprofit] = useState(null);
@@ -301,6 +302,50 @@
         }
       };
 
+      const setDeepValue = (obj, path, value) => {
+        const parts = path.split('.').filter(Boolean);
+        let cursor = obj;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const key = parts[i];
+          if (!cursor[key] || typeof cursor[key] !== 'object') cursor[key] = {};
+          cursor = cursor[key];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      };
+
+      const persistInlineEdit = (path, value) => {
+        const base = siteContentOverride || {
+          copy,
+          socialLinks,
+          nonprofitScenarios,
+          businessScenarios,
+          solutionModuleDetails,
+          packageDetails,
+          insightsItems,
+          lines,
+          nodeDataByLocale: { [locale]: nodeData },
+          serviceItemsByLocale: { [locale]: serviceItems },
+          heroSlidesByLocale: { [locale]: heroSlides }
+        };
+        const next = JSON.parse(JSON.stringify(base));
+        setDeepValue(next, path, value);
+        try { persistSiteContentOverride(next); } catch {}
+        window.location.reload();
+      };
+
+      const editableTextProps = (path) => {
+        if (!editMode) return {};
+        return {
+          contentEditable: true,
+          suppressContentEditableWarning: true,
+          className: 'inline-editable rounded px-1 -mx-1 outline-none focus:ring-2 focus:ring-amber-300/50 bg-amber-400/0 focus:bg-amber-400/10',
+          onBlur: (e) => {
+            const txt = (e.currentTarget && e.currentTarget.innerText) ? e.currentTarget.innerText.trim() : '';
+            persistInlineEdit(path, txt);
+          }
+        };
+      };
+
       const openAdminEditor = async () => {
         setAdminError(null);
         const ok = await ensureAdminUnlocked();
@@ -324,6 +369,23 @@
         };
         setAdminJsonDraft(JSON.stringify(snapshot, null, 2));
         setAdminOpen(true);
+      };
+
+      const toggleEditMode = async () => {
+        if (editMode) {
+          setEditMode(false);
+          return;
+        }
+        const ok = await ensureAdminUnlocked();
+        if (!ok) {
+          window.alert(locale === 'en' ? 'Wrong password.' : 'Şifre yanlış.');
+          return;
+        }
+        setEditMode(true);
+        window.alert(locale === 'en'
+          ? 'Edit mode enabled. Click text to edit, then click outside to save.'
+          : 'Düzenleme modu açık. Metne tıklayıp düzenleyin, sonra dışarı tıklayarak kaydedin.'
+        );
       };
 
       const ANALYTICS_CONFIG = {
@@ -1235,8 +1297,12 @@
         switch (page) {
           case 'about':
             return React.createElement('section', { className:'page-fade section-dynamic relative py-20 px-6 sm:px-10 lg:px-14 mx-auto section-max min-h-[calc(100vh-88px)]' },
-              React.createElement('h1', { className:'text-4xl md:text-5xl font-bold text-white mb-4 motion-underline text-left' }, c.about.title),
-              React.createElement('p', { className:'text-slate-300 mb-10 max-w-3xl text-base leading-relaxed text-left' }, c.about.subtitle),
+              React.createElement('h1', { className:'text-4xl md:text-5xl font-bold text-white mb-4 motion-underline text-left' },
+                React.createElement('span', editableTextProps(`copy.${locale}.about.title`), c.about.title)
+              ),
+              React.createElement('p', { className:'text-slate-300 mb-10 max-w-3xl text-base leading-relaxed text-left' },
+                React.createElement('span', editableTextProps(`copy.${locale}.about.subtitle`), c.about.subtitle)
+              ),
               React.createElement('div', { className:'grid gap-4 md:grid-cols-3 mb-10' },
                 c.about.stats.map((v, i) => React.createElement('div', { key:i, className:'stat-card' },
                   React.createElement('div', { className:'stat-value' }, v),
@@ -1462,8 +1528,12 @@
           case 'contact':
             return React.createElement('section', { className: 'page-fade py-16 px-6 sm:px-10 lg:px-14 mx-auto section-max' },
               React.createElement('div', { className: 'mb-12' },
-                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-left' }, c.contact.title),
-                React.createElement('p', { className: 'text-slate-300 text-lg mb-8 max-w-3xl text-left' }, c.contact.sub)
+                React.createElement('h1', { className: 'text-4xl md:text-5xl font-bold text-white mb-4 text-left' },
+                  React.createElement('span', editableTextProps(`copy.${locale}.contact.title`), c.contact.title)
+                ),
+                React.createElement('p', { className: 'text-slate-300 text-lg mb-8 max-w-3xl text-left' },
+                  React.createElement('span', editableTextProps(`copy.${locale}.contact.sub`), c.contact.sub)
+                )
               ),
               React.createElement('div', { className: 'grid gap-8 lg:grid-cols-3' },
                 React.createElement('div', { className: 'lg:col-span-2' },
@@ -1741,8 +1811,12 @@
                     className:`hero-slide-smooth md:grid md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-6 ${heroSlideVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`
                   },
                     React.createElement('div', null,
-                      React.createElement('h1', { className:'text-2xl sm:text-3xl md:text-5xl font-bold text-white leading-tight mb-3 sm:mb-4 max-w-4xl' }, activeHeroSlide.title),
-                      React.createElement('p', { className:'text-slate-200 text-sm sm:text-base md:text-lg mb-5 sm:mb-6 max-w-3xl' }, activeHeroSlide.sub),
+                      React.createElement('h1', { className:'text-2xl sm:text-3xl md:text-5xl font-bold text-white leading-tight mb-3 sm:mb-4 max-w-4xl' },
+                        React.createElement('span', editableTextProps(`heroSlidesByLocale.${locale}.${heroSlide}.title`), activeHeroSlide.title)
+                      ),
+                      React.createElement('p', { className:'text-slate-200 text-sm sm:text-base md:text-lg mb-5 sm:mb-6 max-w-3xl' },
+                        React.createElement('span', editableTextProps(`heroSlidesByLocale.${locale}.${heroSlide}.sub`), activeHeroSlide.sub)
+                      ),
                       React.createElement('div', { className:'mb-6 flex flex-wrap gap-2' },
                         activeHeroSlide.chips.map((item, idx) => React.createElement('span', { key:idx, className:'inline-flex items-center rounded-full border border-cyan-400/35 bg-cyan-900/25 px-3 py-1 text-xs text-cyan-100' }, item))
                       ),
@@ -1750,7 +1824,9 @@
                         React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.primaryPage), className:'w-full sm:w-auto rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 text-navy px-6 py-3 font-semibold text-sm shadow-lg hover:scale-[1.02] transition-transform' }, activeHeroSlide.primaryLabel),
                         React.createElement('button', { onClick: ()=>onNavigate(activeHeroSlide.secondaryPage), className:'w-full sm:w-auto rounded-xl border border-cyan-400 px-6 py-3 text-cyan-100 text-sm hover:bg-slate-800 transition' }, activeHeroSlide.secondaryLabel)
                       ),
-                      React.createElement('p', { className:'mt-4 text-sm text-slate-300' }, activeHeroSlide.note)
+                      React.createElement('p', { className:'mt-4 text-sm text-slate-300' },
+                        React.createElement('span', editableTextProps(`heroSlidesByLocale.${locale}.${heroSlide}.note`), activeHeroSlide.note)
+                      )
                     ),
                     React.createElement('div', { className:'mt-6 md:mt-0' },
                       React.createElement('div', { className:'overflow-hidden rounded-2xl border border-cyan-300/25 bg-[#05283b]/75 shadow-[0_18px_45px_rgba(0,0,0,0.35)]' },
@@ -2059,7 +2135,7 @@
         ),
         React.createElement('button', {
           type: 'button',
-          onClick: openAdminEditor,
+          onClick: toggleEditMode,
           className: 'fixed bottom-6 right-6 z-[70] h-12 w-12 rounded-full border border-amber-300/40 bg-[#061a26]/90 text-amber-100 shadow-xl hover:bg-amber-900/20 focus:outline-none focus:ring-2 focus:ring-amber-300/40',
           'aria-label': locale === 'en' ? 'Open editor' : 'Düzenleyiciyi aç'
         },
@@ -2068,6 +2144,12 @@
             React.createElement('circle', { cx:'12', cy:'7', r:'4' })
           )
         ),
+        editMode && React.createElement('button', {
+          type: 'button',
+          onClick: openAdminEditor,
+          className: 'fixed bottom-20 right-6 z-[70] h-10 w-10 rounded-full border border-cyan-300/30 bg-[#061a26]/90 text-cyan-100 shadow-xl hover:bg-cyan-900/20 focus:outline-none focus:ring-2 focus:ring-cyan-300/40',
+          'aria-label': locale === 'en' ? 'Open JSON editor' : 'JSON düzenleyiciyi aç'
+        }, '{ }'),
         isAdmin && adminOpen && React.createElement('div', { className:'fixed inset-0 z-[80] bg-black/70 flex items-start justify-center px-4 py-8' },
           React.createElement('div', { className:'w-full max-w-5xl rounded-2xl border border-cyan-400/20 bg-[#061a26] shadow-2xl' },
             React.createElement('div', { className:'flex items-start justify-between gap-4 px-5 py-4 border-b border-slate-800' },
